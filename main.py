@@ -10,6 +10,7 @@ import yt_dlp
 from dotenv import load_dotenv
 import os
 
+
 load_dotenv()
 
 SONGS_PATH = path.join(path.dirname(__file__), "songs")
@@ -26,14 +27,31 @@ client_credentials_manager = SpotifyClientCredentials(client_id=os.getenv("CLIEN
 # Initialize the Spotify client
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-# Playlist URL
-playlist_url = ''
 
-# Split the playlist URL string into a list of substrings
-playlist_id = playlist_url.split("/")[-1].split("?")[0]
+def process_playlist(playlist_url:str):
 
-# Fetch the playlist data
-results = sp.playlist(playlist_id)
+     # Split the playlist URL string into a list of substrings
+    playlist_id = playlist_url.split("/")[-1].split("?")[0]
+
+        # Fetch the playlist data
+    results = sp.playlist(playlist_id)
+
+
+    # Iterate over each track in the playlist and retrieve information
+    for track in results['tracks']['items']:
+        song_name = track['track']['name']
+        artist_name = track['track']['artists'][0]['name']
+        album_name = track['track']['album']['name']
+        album_art = track['track']['album']['images'][0]['url']
+
+        # Print track information
+        print(f"Song: {song_name}, Artist: {artist_name}, Album: {album_name}")
+        print(f"Album Art URL: {album_art}")
+
+        # Download the song
+        file_path = download_song(song_name, artist_name)
+
+        add_metadata(file_path, song_name, artist_name, album_name, album_art)
 
 def sanitize_filename(filename: str):
     # Remove characters that are not allowed in filenames
@@ -107,22 +125,3 @@ def add_metadata(file_path: str, song_name: str, artist_name: str, album_name: s
     )
     
     audio.save(file_path) # save audio file
-
-
-
-
-# Iterate over each track in the playlist and retrieve information
-for track in results['tracks']['items']:
-    song_name = track['track']['name']
-    artist_name = track['track']['artists'][0]['name']
-    album_name = track['track']['album']['name']
-    album_art = track['track']['album']['images'][0]['url']
-    
-    # Print track information
-    print(f"Song: {song_name}, Artist: {artist_name}, Album: {album_name}")
-    print(f"Album Art URL: {album_art}")
-
-    # Download the song
-    file_path = download_song(song_name, artist_name)
-
-    add_metadata(file_path, song_name, artist_name, album_name, album_art)
