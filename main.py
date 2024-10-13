@@ -11,14 +11,16 @@ from dotenv import load_dotenv
 import os
 
 
+
 load_dotenv()
 
-SONGS_PATH = path.join(path.dirname(__file__), "songs")
+# SONGS_PATH = path.join(path.dirname(__file__), "songs")
+
 
 
 # Make sure that the songs directory exists
-if not os.path.exists(SONGS_PATH):
-    os.mkdir(SONGS_PATH)
+# if not os.path.exists(SONGS_PATH):
+#     os.mkdir(SONGS_PATH)
 
 # Spotify API credentials
 client_credentials_manager = SpotifyClientCredentials(client_id=os.getenv("CLIENT_ID"),
@@ -28,14 +30,16 @@ client_credentials_manager = SpotifyClientCredentials(client_id=os.getenv("CLIEN
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 
-def process_playlist(playlist_url:str):
+
+
+def process_playlist(playlist_url: str, songs_path: str):
+
 
      # Split the playlist URL string into a list of substrings
     playlist_id = playlist_url.split("/")[-1].split("?")[0]
 
         # Fetch the playlist data
     results = sp.playlist(playlist_id)
-
 
     # Iterate over each track in the playlist and retrieve information
     for track in results['tracks']['items']:
@@ -49,7 +53,7 @@ def process_playlist(playlist_url:str):
         print(f"Album Art URL: {album_art}")
 
         # Download the song
-        file_path = download_song(song_name, artist_name)
+        file_path = download_song(song_name, artist_name,songs_path)
 
         add_metadata(file_path, song_name, artist_name, album_name, album_art)
 
@@ -57,14 +61,15 @@ def sanitize_filename(filename: str):
     # Remove characters that are not allowed in filenames
     return re.sub(r'[<>:"/\\|?*]', '', filename)
 
-def download_song(song_name: str, artist_name: str):
+def download_song(song_name: str, artist_name: str, songs_path:str):
     sanitized_song_name = sanitize_filename(song_name)
-    
+
+
     # Check if the sanitized song name already ends with ".mp3"
     if not sanitized_song_name.endswith(".mp3"):
-        file_name = path.join(SONGS_PATH, f"{sanitized_song_name}.mp3")
+        file_name = path.join(songs_path, f"{sanitized_song_name}.mp3")
     else:
-        file_name = path.join(SONGS_PATH, sanitized_song_name)
+        file_name = path.join(songs_path, sanitized_song_name)
 
     # Print the file name to ensure it's correct
     print(f"Attempting to download: {song_name} by {artist_name}")
@@ -79,7 +84,7 @@ def download_song(song_name: str, artist_name: str):
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
-        'outtmpl': path.join(SONGS_PATH, f"{sanitized_song_name}"),  # Remove .mp3 here
+        'outtmpl': path.join(songs_path, f"{sanitized_song_name}"),  # Remove .mp3 here
         'verbose': True,       # Enable verbose logging for debugging
     }
 

@@ -3,7 +3,9 @@ from main import process_playlist
 
 def start_download():
     playlist_url = entry_url.get()
-    process_playlist(playlist_url)
+    songs_path = downloadpath.get()
+    process_playlist(playlist_url,songs_path)
+
 
 root = tk.Tk()
 root.title("Music Downloader")
@@ -23,7 +25,8 @@ entry_urlbox.pack()
 label = tk.Label(root,text="Download path", font=("Helvetica",15,"bold"))
 label.pack()
 
-downloadpath = tk.Entry(root, width = 100)
+downloadpath = tk.StringVar()
+downloadpath = tk.Entry(root, width = 100, textvariable=downloadpath)
 downloadpath.pack()
 
 def clicked():
