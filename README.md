@@ -4,6 +4,10 @@ You can download FFmpeg from the official site: https://ffmpeg.org/download.html
 Choose the appropriate build for your operating system (Windows, macOS, or Linux).
 Set Up FFmpeg:
 
+Recommended Option
+Download the ffmpeg-master-latest-win64-gpl-shared.zip file (63.9 MB).
+https://github.com/BtbN/FFmpeg-Builds/releases
+
 After downloading and extracting FFmpeg, you'll need to add it to your system's PATH environment variable. This allows yt-dlp to find it.
 For Windows:
 
