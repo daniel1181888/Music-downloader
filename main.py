@@ -1,6 +1,8 @@
 import os.path
 from os import path
 import re  # For sanitizing filenames
+from tkinter.ttk import Progressbar
+
 import requests
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -32,7 +34,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 
 
-def process_playlist(playlist_url: str, songs_path: str):
+def process_playlist(playlist_url: str, songs_path: str, downloadbar: Progressbar):
 
 
      # Split the playlist URL string into a list of substrings
@@ -41,8 +43,11 @@ def process_playlist(playlist_url: str, songs_path: str):
         # Fetch the playlist data
     results = sp.playlist(playlist_id)
 
+    total_songs = len(results["tracks"] ["items"])
+    downloadbar["maximum"] = total_songs
+
     # Iterate over each track in the playlist and retrieve information
-    for track in results['tracks']['items']:
+    for i , track in enumerate(results["tracks"] ["items"]):
         song_name = track['track']['name']
         artist_name = track['track']['artists'][0]['name']
         album_name = track['track']['album']['name']
@@ -52,10 +57,16 @@ def process_playlist(playlist_url: str, songs_path: str):
         print(f"Song: {song_name}, Artist: {artist_name}, Album: {album_name}")
         print(f"Album Art URL: {album_art}")
 
+
+
         # Download the song
         file_path = download_song(song_name, artist_name,songs_path)
 
         add_metadata(file_path, song_name, artist_name, album_name, album_art)
+
+        downloadbar["value"] = i + 1
+        downloadbar.update_idletasks()
+
 
 def sanitize_filename(filename: str):
     # Remove characters that are not allowed in filenames
@@ -85,7 +96,7 @@ def download_song(song_name: str, artist_name: str, songs_path:str):
             'preferredquality': '192',
         }],
         'outtmpl': path.join(songs_path, f"{sanitized_song_name}"),  # Remove .mp3 here
-        'verbose': True,       # Enable verbose logging for debugging
+        'quite': True,       # Enable verbose logging for debugging
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:

@@ -1,10 +1,16 @@
 import tkinter as tk
+from tkinter import ttk
+from turtledemo.penrose import start
+
+from redis.cluster import command
+
 from main import process_playlist
 
 def start_download():
     playlist_url = entry_url.get()
     songs_path = downloadpath.get()
-    process_playlist(playlist_url,songs_path)
+    process_playlist(playlist_url,songs_path, downloadbar=Downloadbar)
+
 
 
 root = tk.Tk()
@@ -34,10 +40,19 @@ def clicked():
     start_download()
 
 
-btn = tk.Button(root, text = "download" ,
-             fg = "green", command=clicked)
 
+btn = tk.Button(root, text = "download" ,fg = "green", command=clicked)
 btn.pack()
+
+Downloadbar = ttk.Progressbar(
+    root,
+    orient="horizontal",
+    mode="indeterminate",
+    length=300
+)
+Downloadbar.pack(pady=20)
+
+
 
 # Start the GUI event loop
 root.mainloop()
