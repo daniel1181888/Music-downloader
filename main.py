@@ -2,7 +2,6 @@ import os.path
 from os import path
 import re  # For sanitizing filenames
 from tkinter.ttk import Progressbar
-
 import requests
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
