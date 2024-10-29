@@ -71,5 +71,17 @@ Downloadbar = ttk.Progressbar(
 )
 Downloadbar.pack(pady=20)
 
+
+search_label = tk.Label(root, text="Search songs on spotify", font=("Helvetica", 15,))
+search_label.pack()
+
+search_labelbox = tk.StringVar()
+search_labelbox = tk.Entry(root, width=100, textvariable=search_labelbox)
+search_labelbox.pack()
+
+btn = tk.Button(root, text="Search", fg="blue")
+btn.pack()
+
+
 # Start the GUI event loop
 root.mainloop()
