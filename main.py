@@ -34,16 +34,17 @@ def searchsong(search_labelbox):
 
     results = sp.search(q=search_labelbox,type="track",limit=10)
 
+    track_info = []
+
     for track in results["tracks"]["items"]:
         track_name = track["name"]
         artist_name = track['artists'][0]['name']
         track_url = track["external_urls"]["spotify"]
 
-        print(F"Track{track_name} by {artist_name}")
-        print(F"URL: {track_url}")
+        track_detail = f"Track: {track_name} by {artist_name}\nURL: {track_url}\n"
+        track_info.append(track_detail)
 
-
-
+    return track_info
 
 
 def process_playlist(playlist_url: str, songs_path: str, downloadbar: Progressbar):

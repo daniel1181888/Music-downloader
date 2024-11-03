@@ -1,6 +1,7 @@
 import threading
 import tkinter as tk
 from tkinter import ttk
+from tkinter.tix import WINDOW
 
 from redis.cluster import command
 
@@ -34,7 +35,14 @@ def check_thread():
         download_label.config(text="Download Complete!")  # Update the correct label
 
 def searchsongclicked():
-    searchsong(search_labelbox)
+
+    song_name = search_labelbox.get()  # Get the song name from the entry box
+    results_text.delete(1.0, tk.END)  # Clear previous results
+
+    for track in searchsong(song_name):
+        results_text.insert(tk.END, F"{track}\n")
+
+
 
 
 # GUI Setup
@@ -89,6 +97,9 @@ search_labelbox.pack()
 
 btn = tk.Button(root, text="Search", fg="blue", command=searchsongclicked)
 btn.pack()
+
+results_text = tk.Text(root, width=50, height=15)
+results_text.pack(pady=10)
 
 
 # Start the GUI event loop
