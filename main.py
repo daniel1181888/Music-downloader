@@ -30,6 +30,19 @@ client_credentials_manager = SpotifyClientCredentials(client_id=os.getenv("CLIEN
 # Initialize the Spotify client
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
+def searchsong(search_labelbox):
+
+    results = sp.search(q=search_labelbox,type="track",limit=10)
+
+    for track in results["tracks"]["items"]:
+        track_name = track["name"]
+        artist_name = track['artists'][0]['name']
+        track_url = track["external_urls"]["spotify"]
+
+        print(F"Track{track_name} by {artist_name}")
+        print(F"URL: {track_url}")
+
+
 
 
 

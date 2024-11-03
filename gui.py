@@ -1,7 +1,11 @@
 import threading
 import tkinter as tk
 from tkinter import ttk
+
+from redis.cluster import command
+
 from main import process_playlist
+from main import searchsong
 
 # Initialize global download thread
 download_thread = None
@@ -28,6 +32,10 @@ def check_thread():
         root.after(100, check_thread)  # Keep checking every 100ms
     else:
         download_label.config(text="Download Complete!")  # Update the correct label
+
+def searchsongclicked():
+    searchsong(search_labelbox)
+
 
 # GUI Setup
 root = tk.Tk()
@@ -79,7 +87,7 @@ search_labelbox = tk.StringVar()
 search_labelbox = tk.Entry(root, width=100, textvariable=search_labelbox)
 search_labelbox.pack()
 
-btn = tk.Button(root, text="Search", fg="blue")
+btn = tk.Button(root, text="Search", fg="blue", command=searchsongclicked)
 btn.pack()
 
 
