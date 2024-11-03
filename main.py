@@ -47,6 +47,31 @@ def searchsong(search_labelbox):
     return track_info
 
 
+
+
+def process_singel_song(song_url:str, song_path: str):
+
+    song_id = song_url.split("/"[-1].split("?")[0])
+
+    track = sp.track(song_id)
+
+    song_name = track["name"]
+    artist_name = track['artists'][0]['name']
+    album_name = track['album']['name']
+    album_art = track['album']['images'][0]['url']
+
+    print(f"Song: {song_name}, Artist: {artist_name}, Album: {album_name}")
+    print(f"Album Art URL: {album_art}")
+
+    file_path = download_song(song_name,artist_name,song_path)
+
+    add_metadata(file_path,song_name,artist_name,album_name,album_art)
+
+    print(F"Download complete: {file_path}")
+
+
+
+
 def process_playlist(playlist_url: str, songs_path: str, downloadbar: Progressbar):
 
 
