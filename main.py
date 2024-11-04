@@ -30,6 +30,13 @@ client_credentials_manager = SpotifyClientCredentials(client_id=os.getenv("CLIEN
 # Initialize the Spotify client
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
+def analyzeUrl(playlist_url, songs_path,downloadbar: Progressbar):
+    if "playlist" in playlist_url:
+        process_playlist(playlist_url, songs_path, downloadbar)
+    if "track" in playlist_url:
+        process_singel_song(playlist_url, songs_path)
+
+
 def searchsong(search_labelbox):
 
     results = sp.search(q=search_labelbox,type="track",limit=10)

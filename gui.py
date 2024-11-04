@@ -5,7 +5,7 @@ from tkinter.tix import WINDOW
 
 from redis.cluster import command
 
-from main import process_playlist
+from main import analyzeUrl
 from main import searchsong
 
 # Initialize global download thread
@@ -15,7 +15,7 @@ download_thread = None
 def start_download():
     playlist_url = entry_url.get()
     songs_path = downloadpath.get()  # Now correctly fetching the path from StringVar
-    process_playlist(playlist_url, songs_path, downloadbar=Downloadbar)
+    analyzeUrl(playlist_url, songs_path, downloadbar=Downloadbar)
 
 # Function that will be called when the download button is clicked
 def clicked():
