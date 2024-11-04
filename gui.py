@@ -2,11 +2,10 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter.tix import WINDOW
-
 from redis.cluster import command
-
 from main import analyzeUrl
 from main import searchsong
+from PIL import Image, ImageTk
 
 # Initialize global download thread
 download_thread = None
@@ -49,6 +48,16 @@ def searchsongclicked():
 root = tk.Tk()
 root.title("Music Downloader")
 root.geometry('1000x800')
+
+#load background
+background_image = Image.open("imgs/1920x1080-aesthetic-glrfk0ntspz3tvxg.jpg")
+background_image = background_image.resize((1000,800))
+bg_image = ImageTk.PhotoImage(background_image)
+
+# Create a label for background
+# Create a Label for the background
+background_label = tk.Label(root, image=bg_image)
+background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 # Create the main label for the application
 main_label = tk.Label(root, text="Music Downloader (by dj fdjesko)", font=("Helvetica", 24, "bold"))
