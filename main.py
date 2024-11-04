@@ -58,7 +58,7 @@ def searchsong(search_labelbox):
 
 def process_singel_song(song_url:str, song_path: str):
 
-    song_id = song_url.split("/"[-1].split("?")[0])
+    song_id = song_url.split("/")[-1].split("?")[0]
 
     track = sp.track(song_id)
 
