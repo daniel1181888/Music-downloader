@@ -49,6 +49,10 @@ root = tk.Tk()
 root.title("Music Downloader")
 root.geometry('1000x800')
 
+#Styling
+label_style = {"bg": "#4e4e4e", "fg": "white", "font": ("Arial", 12, "bold")}
+entry_style = {"bg": "#3c3c3c", "fg": "white", "font": ("Arial", 12), "insertbackground": "white"}
+
 #load background
 background_image = Image.open("imgs/1920x1080-aesthetic-glrfk0ntspz3tvxg.jpg")
 background_image = background_image.resize((1000,800))
@@ -60,28 +64,28 @@ background_label = tk.Label(root, image=bg_image)
 background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 # Create the main label for the application
-main_label = tk.Label(root, text="Music Downloader (by dj fdjesko)", font=("Helvetica", 24, "bold"))
-main_label.pack()
+main_label = tk.Label(root, text="Music Downloader (by dj fdjesko)", **label_style)
+main_label.pack(pady=(20, 10))
 
 # Label and entry box for Spotify URL
-url_label = tk.Label(root, text="Spotify URL", font=("Helvetica", 15, "bold"))
+url_label = tk.Label(root, text="Spotify URL", **label_style)
 url_label.pack()
 
 entry_url = tk.StringVar()
-entry_urlbox = tk.Entry(root, width=100, textvariable=entry_url)
-entry_urlbox.pack()
+entry_urlbox = tk.Entry(root, width=100, textvariable=entry_url, **entry_style)
+entry_urlbox.pack(pady = (20, 10))
 
 # Label and entry box for download path
-path_label = tk.Label(root, text="Download Path", font=("Helvetica", 15, "bold"))
-path_label.pack()
+path_label = tk.Label(root, text="Download Path", **label_style)
+path_label.pack(pady=(20, 10))
 
 downloadpath = tk.StringVar()  # Now a StringVar to store the path
-downloadpathbox = tk.Entry(root, width=100, textvariable=downloadpath)  # Entry box for path
+downloadpathbox = tk.Entry(root, width=100, textvariable=downloadpath, **label_style)  # Entry box for path
 downloadpathbox.pack()
 
 # Label to display download status
-download_label = tk.Label(root, text="", font=("Helvetica", 12))  # Unique label for status updates
-download_label.pack()
+download_label = tk.Label(root, text="", **label_style)  # Unique label for status updates
+download_label.pack(pady=(20, 10))
 
 # Download button
 btn = tk.Button(root, text="Download", fg="green", command=clicked)
@@ -97,12 +101,12 @@ Downloadbar = ttk.Progressbar(
 Downloadbar.pack(pady=20)
 
 
-search_label = tk.Label(root, text="Search songs on spotify", font=("Helvetica", 15,))
-search_label.pack()
+search_label = tk.Label(root, text="Search songs on spotify", **label_style)
+search_label.pack(pady=(20, 10))
 
 search_labelbox = tk.StringVar()
-search_labelbox = tk.Entry(root, width=100, textvariable=search_labelbox)
-search_labelbox.pack()
+search_labelbox = tk.Entry(root, width=100, textvariable=search_labelbox, **entry_style)
+search_labelbox.pack(pady=(20, 10))
 
 btn = tk.Button(root, text="Search", fg="blue", command=searchsongclicked)
 btn.pack()
