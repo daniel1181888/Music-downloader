@@ -55,7 +55,7 @@ entry_style = {"bg": "#3c3c3c", "fg": "white", "font": ("Arial", 12), "insertbac
 
 #load background
 background_image = Image.open("imgs/1920x1080-aesthetic-glrfk0ntspz3tvxg.jpg")
-background_image = background_image.resize((1000,800))
+background_image = background_image.resize((1920,1080))
 bg_image = ImageTk.PhotoImage(background_image)
 
 # Create a label for background
