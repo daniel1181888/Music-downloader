@@ -40,6 +40,9 @@ For Windows:
 
 For macOS/Linux:
 
+Ubuntu: Simply install ffmpeg by doing `sudo apt install ffmpeg`
+
+
 If you're using Homebrew, you can install FFmpeg by running:
 bash
 Code kopiëren
