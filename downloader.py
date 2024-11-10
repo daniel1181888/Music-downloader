@@ -57,11 +57,12 @@ class Downloader:
             'format': 'bestaudio/best',
             'outtmpl': output_template,
             'quiet': True,
+            'no_warnings': True,
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
                 'preferredquality': '192',
-            }],
+                }],
         }
         search_query = f"ytsearch:{song_name} {artist_name}"
         try:
@@ -71,58 +72,98 @@ class Downloader:
         except Exception as e:
             raise Exception(f"Failed to download '{song_name}' by '{artist_name}': {e}")
 
-    def download_track(self, track_url, progress_callback=None):
+    def download_track(self, track_url, update_progress=None):
         """
         Download a single track from a Spotify URL.
 
         Args:
             track_url (str): The Spotify URL of the track.
-            progress_callback (function, optional): A callback function to update progress.
-
-        If progress_callback is provided, it will be called with (current, total).
-
-        Raises:
-            Exception: If the download fails.
+            update_progress (function, optional): Function to update progress.
         """
-        try:
-            track_info = self.spotify_client.get_track_info(track_url)
-            song_name = track_info['name']
-            artist_name = track_info['artists'][0]['name']
-            album_name = track_info['album']['name']
-            album_art_url = track_info['album']['images'][0]['url']
+        track_info = self.spotify_client.get_track_info(track_url)
+        song_name = track_info['name']
+        artist_name = track_info['artists'][0]['name']
+        album_name = track_info['album']['name']
+        album_art_url = track_info['album']['images'][0]['url']
 
-            file_path = self.download_song(song_name, artist_name)
-            self.metadata_manager.add_metadata(file_path, song_name, artist_name, album_name, album_art_url)
+        if update_progress:
+            update_progress(0, 1)
 
-            if progress_callback:
-                progress_callback(1, 1)
-        except Exception as e:
-            raise Exception(f"Failed to download track: {e}")
+        file_path = self.download_song(song_name, artist_name)
+        self.metadata_manager.add_metadata(file_path, song_name, artist_name, album_name, album_art_url)
 
-    def download_playlist(self, playlist_url, progress_callback=None):
+        if update_progress:
+            update_progress(1, 1)
+
+    def download_playlist(self, playlist_url, create_progress_bar, total_update_progress, total_signal_completion):
         """
         Download all tracks in a Spotify playlist URL.
 
         Args:
             playlist_url (str): The Spotify URL of the playlist.
-            progress_callback (function, optional): A callback function to update progress.
-
-        If progress_callback is provided, it will be called with (current, total) after each track.
-
-        Raises:
-            Exception: If the download fails.
+            create_progress_bar (function): Function to create progress bars.
+            total_update_progress (function): Function to update total progress.
+            total_signal_completion (function): Function to signal total completion.
         """
-        try:
-            tracks = self.spotify_client.get_playlist_tracks(playlist_url)
-            total_tracks = len(tracks)
-            for idx, item in enumerate(tracks, start=1):
-                track = item['track']
-                track_url = track['external_urls']['spotify']
-                self.download_track(track_url)
-                if progress_callback:
-                    progress_callback(idx, total_tracks)
-        except Exception as e:
-            raise Exception(f"Failed to download playlist: {e}")
+        tracks = self.spotify_client.get_playlist_tracks(playlist_url)
+        total_tracks = len(tracks)
+
+        # Initialize total progress
+        total_update_progress(0, total_tracks)
+
+        completed_tracks = 0
+
+        def track_completed():
+            nonlocal completed_tracks
+            completed_tracks += 1
+            total_update_progress(completed_tracks, total_tracks)
+            if completed_tracks == total_tracks:
+                total_signal_completion()
+
+        for item in tracks:
+            track = item['track']
+            track_url = track['external_urls']['spotify']
+            song_name = track['name']
+            artist_name = track['artists'][0]['name']
+
+            # Create progress bar for the track
+            track_title = f"{song_name} by {artist_name}"
+            track_update_progress, track_signal_completion = create_progress_bar(track_title)
+
+            # Start downloading the track
+            self.download_track_async(track_url, track_update_progress, lambda: [track_signal_completion(), track_completed()])
+
+    def download_track_async(self, track_url, update_progress, signal_completion):
+        """
+        Asynchronously download a single track.
+
+        Args:
+            track_url (str): The Spotify URL of the track.
+            update_progress (function): Function to update progress.
+            signal_completion (function): Function to signal completion.
+        """
+        def run():
+            try:
+                self.download_track(track_url, update_progress)
+            except Exception as e:
+                print(f"Error downloading track: {e}")
+            finally:
+                signal_completion()
+
+        threading.Thread(target=run).start()
+
+    def download_playlist_async(self, playlist_url, create_progress_bar, total_update_progress, total_signal_completion):
+        """
+        Asynchronously download a playlist.
+
+        Args:
+            playlist_url (str): The Spotify URL of the playlist.
+            create_progress_bar (function): Function to create progress bars.
+            total_update_progress (function): Function to update total progress.
+            total_signal_completion (function): Function to signal total completion.
+        """
+        threading.Thread(target=self.download_playlist, args=(playlist_url, create_progress_bar,
+                                                              total_update_progress, total_signal_completion)).start()
 
     def search_tracks(self, query, limit=10):
         """
@@ -134,68 +175,5 @@ class Downloader:
 
         Returns:
             list: A list of track information dictionaries.
-
-        Raises:
-            Exception: If the search fails.
         """
-        try:
-            return self.spotify_client.search_tracks(query, limit)
-        except Exception as e:
-            raise Exception(f"Failed to search tracks: {e}")
-
-    def download(self, url, progress_callback=None):
-        """
-        Download a track or playlist from a Spotify URL.
-
-        Args:
-            url (str): The Spotify URL of the track or playlist.
-            progress_callback (function, optional): A callback function to update progress.
-
-        Determines whether the URL is a track or playlist and downloads accordingly.
-
-        If progress_callback is provided, it will be called with (current, total).
-
-        Raises:
-            ValueError: If the URL is invalid.
-        """
-        if "playlist" in url:
-            self.download_playlist(url, progress_callback)
-        elif "track" in url:
-            self.download_track(url, progress_callback)
-        else:
-            raise ValueError("Invalid URL")
-
-    def download_async(self, url, progress_callback=None, completion_callback=None):
-        """
-        Asynchronously download a track or playlist from a Spotify URL.
-
-        Args:
-            url (str): The Spotify URL of the track or playlist.
-            progress_callback (function, optional): A callback function to update progress.
-            completion_callback (function, optional): A callback function called when download completes.
-
-        Starts a new thread to perform the download.
-
-        If progress_callback is provided, it will be called with (current, total).
-        If completion_callback is provided, it will be called when download is complete.
-        """
-        thread = threading.Thread(target=self._download_thread, args=(url, progress_callback, completion_callback))
-        thread.start()
-
-    def _download_thread(self, url, progress_callback, completion_callback):
-        """
-        Internal method to run the download in a separate thread.
-
-        Args:
-            url (str): The Spotify URL of the track or playlist.
-            progress_callback (function): A callback function to update progress.
-            completion_callback (function): A callback function called when download completes.
-        """
-        try:
-            self.download(url, progress_callback)
-            if completion_callback:
-                completion_callback(success=True)
-        except Exception as e:
-            if completion_callback:
-                completion_callback(success=False, error=str(e))
-
+        return self.spotify_client.search_tracks(query, limit)
