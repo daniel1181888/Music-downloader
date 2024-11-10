@@ -50,5 +50,6 @@ Setting up the spotify API
 5. Copy the client id and secret from the app settings on the dashboard, into your .env file
 
 Running the music downloader
-==================================== TODO: Replace the chatgpt stuff with actual instructions
+====================================
+TODO: Replace the chatgpt stuff with actual instructions
 After completing the steps above, try running your Python script again. It should be able to find FFmpeg and process the audio files without throwing the previous error.
