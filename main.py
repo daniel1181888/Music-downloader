@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os.path
 from os import path
 import re  # For sanitizing filenames
