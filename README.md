@@ -1,4 +1,4 @@
-#Install instructions:
+Install instructions:
 ============================
 
 ## For Windows:
@@ -31,14 +31,14 @@ If you're using Homebrew, you can install FFmpeg by running:
 brew install ffmpeg
 // TODO: add instructions for installing other dependancies, as for Linux 
 
-# Verify FFmpeg Installation:
+Verify FFmpeg Installation:
 ============================
 
 Open a command prompt or terminal window.
 Type ffmpeg -version and press Enter.
 If it’s installed correctly, you should see version information for FFmpeg.
 
-# Setting up the spotify API
+Setting up the spotify API
 ===========================
 1. Go to the (Spotify Developer Dashboard)[https://developer.spotify.com/dashboard]
 2. Create an app
@@ -49,6 +49,6 @@ If it’s installed correctly, you should see version information for FFmpeg.
 4. Create a .env file from the .example.env file (`cp .example.env .env`)
 5. Copy the client id and secret from the app settings on the dashboard, into your .env file
 
-# Running the music downloader
+Running the music downloader
 ==================================== TODO: Replace the chatgpt stuff with actual instructions
 After completing the steps above, try running your Python script again. It should be able to find FFmpeg and process the audio files without throwing the previous error.

@@ -1,28 +1,40 @@
 # gui.py
 
-import threading
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
-from music_downloader import MusicDownloader
+from downloader import Downloader
 from dotenv import load_dotenv
 import os
 
 class MusicDownloaderGUI:
+    """
+    A GUI application for downloading music from Spotify URLs.
+    """
+
     def __init__(self, root):
-        # ensure download folder
+        """
+        Initialize the MusicDownloaderGUI.
+
+        Args:
+            root (tk.Tk): The root Tkinter window.
+        """
+        # Ensure the download folder exists
         load_dotenv()
-        download_path = os.getenv("DOWNLOAD_PATH") or "./songs/"
-        if not os.path.exists(download_path):
-            os.mkdir(download_path)
+        songs_path = os.getenv("SONGS_PATH") or "./songs/"
+        if not os.path.exists(songs_path):
+            os.mkdir(songs_path)
 
         self.root = root
         self.root.title("Music Downloader")
         self.root.geometry('1000x800')
-        self.music_downloader = MusicDownloader(download_path)
+        self.downloader = Downloader(songs_path)
         self.setup_ui()
 
     def setup_ui(self):
+        """
+        Set up the user interface components.
+        """
         # Define styles
         label_style = {"bg": "#4e4e4e", "fg": "white", "font": ("Arial", 12, "bold")}
         entry_style = {"bg": "#3c3c3c", "fg": "white", "font": ("Arial", 12), "insertbackground": "white"}
@@ -54,7 +66,7 @@ class MusicDownloaderGUI:
         self.download_label.pack(pady=(20, 10))
 
         # Download button
-        tk.Button(self.root, text="Download", fg="green", command=self.start_download_thread).pack()
+        tk.Button(self.root, text="Download", fg="green", command=self.start_download).pack()
 
         # Progress bar
         self.download_bar = ttk.Progressbar(self.root, orient="horizontal", mode="determinate", length=300)
@@ -68,38 +80,58 @@ class MusicDownloaderGUI:
         self.results_text = tk.Text(self.root, width=50, height=15)
         self.results_text.pack(pady=10)
 
-    def start_download_thread(self):
+    def start_download(self):
+        """
+        Start the download process.
+        """
         self.download_label.config(text="Downloading...")
-        self.download_thread = threading.Thread(target=self.download)
-        self.download_thread.start()
-        self.check_download_thread()
-
-    def download(self):
         url = self.entry_url.get()
         download_path = self.download_path_entry.get()
-        self.music_downloader.downloader.download_path = download_path
-
-        if "playlist" in url:
-            self.music_downloader.download_playlist(url, progress_callback=self.update_progress)
-        elif "track" in url:
-            self.music_downloader.download_track(url, progress_callback=self.update_progress)
+        if not download_path:
+            download_path = os.getenv("SONGS_PATH") or "./songs/"
         else:
-            self.download_label.config(text="Invalid URL")
+            if not os.path.exists(download_path):
+                os.makedirs(download_path)
+        self.downloader.download_path = download_path
 
-    def check_download_thread(self):
-        if self.download_thread.is_alive():
-            self.root.after(100, self.check_download_thread)
-        else:
-            self.download_label.config(text="Download Complete!")
+        # Start asynchronous download
+        self.downloader.download_async(
+            url,
+            progress_callback=self.update_progress,
+            completion_callback=self.download_complete
+        )
 
     def update_progress(self, current, total):
+        """
+        Update the progress bar.
+
+        Args:
+            current (int): The current progress value.
+            total (int): The total value for completion.
+        """
         self.download_bar["maximum"] = total
         self.download_bar["value"] = current
         self.download_bar.update()
 
+    def download_complete(self, success, error=None):
+        """
+        Called when the download is complete.
+
+        Args:
+            success (bool): True if download succeeded, False otherwise.
+            error (str, optional): Error message if download failed.
+        """
+        if success:
+            self.download_label.config(text="Download Complete!")
+        else:
+            self.download_label.config(text=f"Error: {error}")
+
     def search_songs(self):
+        """
+        Search for songs on Spotify and display the results.
+        """
         query = self.search_entry.get()
-        results = self.music_downloader.search_tracks(query)
+        results = self.downloader.search_tracks(query)
         self.results_text.delete(1.0, tk.END)
         for track in results:
             name = track['name']
