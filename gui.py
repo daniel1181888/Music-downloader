@@ -5,14 +5,21 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 from music_downloader import MusicDownloader
-
+from dotenv import load_dotenv
+import os
 
 class MusicDownloaderGUI:
     def __init__(self, root):
+        # ensure download folder
+        load_dotenv()
+        download_path = os.getenv("DOWNLOAD_PATH") or "./songs/"
+        if not os.path.exists(download_path):
+            os.mkdir(download_path)
+
         self.root = root
         self.root.title("Music Downloader")
         self.root.geometry('1000x800')
-        self.music_downloader = MusicDownloader(download_path="")
+        self.music_downloader = MusicDownloader(download_path)
         self.setup_ui()
 
     def setup_ui(self):
