@@ -38,8 +38,15 @@ def searchsongclicked():
     song_name = search_labelbox.get()  # Get the song name from the entry box
     results_text.delete(1.0, tk.END)  # Clear previous results
 
-    for track in searchsong(song_name):
-        results_text.insert(tk.END, F"{track}\n")
+    for track,artist_name,track_url in searchsong(song_name):
+        results_text.insert(tk.END, f"{track} By {artist_name}\n")
+        button = tk.Button(results_text, text="Kopieer link", command=lambda url=track_url: kopieerlink(url))
+        results_text.window_create(tk.END, window=button)
+        results_text.insert(tk.END, "\n")
+
+def kopieerlink(url):
+    entry_url.set(url)
+
 
 
 
@@ -111,7 +118,7 @@ search_labelbox.pack(pady=(20, 10))
 btn = tk.Button(root, text="Search", fg="blue", command=searchsongclicked)
 btn.pack()
 
-results_text = tk.Text(root, width=50, height=15)
+results_text = tk.Text(root, width=50, height=15,**entry_style)
 results_text.pack(pady=10)
 
 

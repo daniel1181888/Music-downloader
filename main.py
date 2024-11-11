@@ -48,8 +48,7 @@ def searchsong(search_labelbox):
         artist_name = track['artists'][0]['name']
         track_url = track["external_urls"]["spotify"]
 
-        track_detail = f"Track: {track_name} by {artist_name}\nURL: {track_url}\n"
-        track_info.append(track_detail)
+        track_info.append((track_name, artist_name, track_url))
 
     return track_info
 
