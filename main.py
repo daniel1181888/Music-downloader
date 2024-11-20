@@ -30,11 +30,11 @@ client_credentials_manager = SpotifyClientCredentials(client_id=os.getenv("CLIEN
 # Initialize the Spotify client
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-def analyzeUrl(playlist_url, songs_path,downloadbar: Progressbar):
+def analyzeUrl(playlist_url, songs_path,downloadbar: Progressbar,update_callback=None):
     if "playlist" in playlist_url:
-        process_playlist(playlist_url, songs_path, downloadbar)
+        process_playlist(playlist_url, songs_path, downloadbar,update_callback)
     if "track" in playlist_url:
-        process_singel_song(playlist_url, songs_path)
+        process_singel_song(playlist_url, songs_path,update_callback)
 
 
 def searchsong(search_labelbox):
@@ -55,7 +55,7 @@ def searchsong(search_labelbox):
 
 
 
-def process_singel_song(song_url:str, song_path: str):
+def process_singel_song(song_url:str, song_path: str,update_callback=None):
 
     song_id = song_url.split("/")[-1].split("?")[0]
 
@@ -69,7 +69,7 @@ def process_singel_song(song_url:str, song_path: str):
     print(f"Song: {song_name}, Artist: {artist_name}, Album: {album_name}")
     print(f"Album Art URL: {album_art}")
 
-    file_path = download_song(song_name,artist_name,song_path)
+    file_path = download_song(song_name,artist_name,song_path,update_callback)
 
     add_metadata(file_path,song_name,artist_name,album_name,album_art)
 
@@ -78,7 +78,7 @@ def process_singel_song(song_url:str, song_path: str):
 
 
 
-def process_playlist(playlist_url: str, songs_path: str, downloadbar: Progressbar):
+def process_playlist(playlist_url: str, songs_path: str, downloadbar: Progressbar,update_callback=None):
 
 
      # Split the playlist URL string into a list of substrings
@@ -104,9 +104,9 @@ def process_playlist(playlist_url: str, songs_path: str, downloadbar: Progressba
 
 
         # Download the song
-        file_path = download_song(song_name, artist_name,songs_path)
+        file_path = download_song(song_name, artist_name,songs_path,update_callback)
 
-        add_metadata(file_path, song_name, artist_name, album_name, album_art)
+        add_metadata(file_path, song_name, artist_name, album_name, album_art,)
 
         downloadbar["value"] = i + 1
         downloadbar.update_idletasks()
@@ -116,7 +116,7 @@ def sanitize_filename(filename: str):
     # Remove characters that are not allowed in filenames
     return re.sub(r'[<>:"/\\|?*]', '', filename)
 
-def download_song(song_name: str, artist_name: str, songs_path:str):
+def download_song(song_name: str, artist_name: str, songs_path:str ,update_callback=None):
     sanitized_song_name = sanitize_filename(song_name)
 
 
@@ -125,6 +125,11 @@ def download_song(song_name: str, artist_name: str, songs_path:str):
         file_name = path.join(songs_path, f"{sanitized_song_name}.mp3")
     else:
         file_name = path.join(songs_path, sanitized_song_name)
+
+    # Update GUI with the current download info
+    if update_callback:
+        update_callback(f"Attempting to download: {song_name}")
+
 
     # Print the file name to ensure it's correct
     print(f"Attempting to download: {song_name} by {artist_name}")
@@ -151,10 +156,15 @@ def download_song(song_name: str, artist_name: str, songs_path:str):
         print(f"Download completed: {file_name}")
     else:
         print(f"Download failed or file not found: {file_name}")
+
+        # Check if the file was successfully downloaded
+    if path.exists(file_name):
+        success_message = f"Download complete: {file_name}"
+        print(success_message)
+        if update_callback:
+            update_callback(success_message)
     
     return file_name
-
-
 
 
 

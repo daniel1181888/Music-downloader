@@ -14,7 +14,7 @@ download_thread = None
 def start_download():
     playlist_url = entry_url.get()
     songs_path = downloadpath.get()  # Now correctly fetching the path from StringVar
-    analyzeUrl(playlist_url, songs_path, downloadbar=Downloadbar)
+    analyzeUrl(playlist_url, songs_path, downloadbar=Downloadbar, update_callback=update_current_song)
 
 # Function that will be called when the download button is clicked
 def clicked():
@@ -47,8 +47,8 @@ def searchsongclicked():
 def kopieerlink(url):
     entry_url.set(url)
 
-
-
+def update_current_song(message):
+    download_label.config(text=message)
 
 
 # GUI Setup
