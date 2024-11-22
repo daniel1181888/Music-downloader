@@ -1,12 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
-from redis.cluster import command
-
 from downloader import Downloader
 from dotenv import load_dotenv
 import os
 import threading
+
 
 class MusicDownloaderGUI:
     def __init__(self, root):
@@ -15,19 +14,18 @@ class MusicDownloaderGUI:
         if not os.path.exists(songs_path):
             os.mkdir(songs_path)
 
-        # GUI Setup
         self.root = root
         self.root.title("Music Downloader")
         self.root.geometry('1000x800')
 
-        #create canvas and scrollbar
+        # Create a canvas and a scrollbar
         self.canvas = tk.Canvas(root)
         self.scrollbar = ttk.Scrollbar(root, orient="vertical", command=self.canvas.yview)
-        self.scrollbar_frame = tk.Frame(self.canvas)
+        self.scrollable_frame = ttk.Frame(self.canvas)
 
-        self.scrollbar_frame.bind(
+        self.scrollable_frame.bind(
             "<Configure>",
-            lambda e:self.canvas.configure(
+            lambda e: self.canvas.configure(
                 scrollregion=self.canvas.bbox("all")
             )
         )
@@ -42,128 +40,121 @@ class MusicDownloaderGUI:
         self.setup_ui()
 
     def setup_ui(self):
-        self.label_style
+        self.label_style = {"bg": "#4e4e4e", "fg": "white", "font": ("Arial", 12, "bold")}
+        self.entry_style = {"bg": "#3c3c3c", "fg": "white", "font": ("Arial", 12), "insertbackground": "white"}
 
+        background_image = Image.open("imgs/background.jpg")
+        background_image = background_image.resize((1920, 1080))
+        bg_image = ImageTk.PhotoImage(background_image)
+        background_label = tk.Label(self.scrollable_frame, image=bg_image)
+        background_label.image = bg_image
+        background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
+        main_label = tk.Label(self.scrollable_frame, text="Music Downloader (by dj fdjesko)", **self.label_style)
+        main_label.pack(pady=(20, 10))
 
+        self.setup_ui_download_section()
+        self.setup_ui_search_section()
+        self.setup_ui_download_bars_section()
 
+    def setup_ui_download_section(self):
+        tk.Label(self.scrollable_frame, text="Spotify URL", **self.label_style).pack()
+        self.entry_url = tk.Entry(self.scrollable_frame, width=100, **self.entry_style)
+        self.entry_url.pack(pady=(20, 10))
 
+        tk.Label(self.scrollable_frame, text="Download Path", **self.label_style).pack(pady=(20, 10))
+        self.download_path_entry = tk.Entry(self.scrollable_frame, width=100, **self.entry_style)
+        self.download_path_entry.pack()
 
+        tk.Button(self.scrollable_frame, text="Download", fg="green", command=self.start_download).pack(pady=(10, 0))
 
-# Initialize global download thread
-download_thread = None
+    def setup_ui_search_section(self):
+        tk.Label(self.scrollable_frame, text="Search songs on Spotify", **self.label_style).pack(pady=(20, 10))
+        self.search_entry = tk.Entry(self.scrollable_frame, width=100, **self.entry_style)
+        self.search_entry.pack(pady=(20, 10))
+        tk.Button(self.scrollable_frame, text="Search", fg="blue", command=self.search_songs).pack()
 
-# Function to start the download (runs in a separate thread)
-def start_download():
-    playlist_url = entry_url.get()
-    songs_path = downloadpath.get()  # Now correctly fetching the path from StringVar
-    analyzeUrl(playlist_url, songs_path, downloadbar=Downloadbar, update_callback=update_current_song)
+        self.results_frame = tk.Frame(self.scrollable_frame)
+        self.results_frame.pack(pady=10)
 
-# Function that will be called when the download button is clicked
-def clicked():
-    global download_thread
-    if not download_thread or not download_thread.is_alive():
-        download_label.config(text="Downloading...")  # Update the correct label
-        # Start the download process in a new thread
-        download_thread = threading.Thread(target=start_download)
-        download_thread.start()
-        check_thread()  # Start checking the thread status
+    def setup_ui_download_bars_section(self):
+        tk.Label(self.scrollable_frame, text="Download Progress", **self.label_style).pack(pady=(20, 10))
+        self.download_bars_frame = tk.Frame(self.scrollable_frame)
+        self.download_bars_frame.pack(fill='x', pady=10)
 
-# Function to check the status of the download thread
-def check_thread():
-    if download_thread.is_alive():
-        root.after(100, check_thread)  # Keep checking every 100ms
-    else:
-        download_label.config(text="Download Complete!")  # Update the correct label
+    def create_progress_bar(self, title):
+        frame = tk.Frame(self.download_bars_frame)
+        frame.pack(fill='x', pady=5)
 
-def searchsongclicked():
+        label = tk.Label(frame, text=title, anchor='w')
+        label.pack(side='left')
 
-    song_name = search_labelbox.get()  # Get the song name from the entry box
-    results_text.delete(1.0, tk.END)  # Clear previous results
+        progress_bar = ttk.Progressbar(frame, orient="horizontal", mode="determinate", length=200)
+        progress_bar.pack(side='left', padx=5)
 
-    for track,artist_name,track_url in searchsong(song_name):
-        results_text.insert(tk.END, f"{track} By {artist_name}\n")
-        button = tk.Button(results_text, text="Kopieer link", command=lambda url=track_url: kopieerlink(url))
-        results_text.window_create(tk.END, window=button)
-        results_text.insert(tk.END, "\n")
+        def update_progress(current, total):
+            self.root.after(0, lambda: self._update_progress_bar(progress_bar, current, total))
 
-def kopieerlink(url):
-    entry_url.set(url)
+        def signal_completion():
+            self.root.after(0, lambda: self._signal_completion(frame, label, progress_bar, title))
 
-def update_current_song(message):
-    download_label.config(text=message)
+        return update_progress, signal_completion
 
+    def _update_progress_bar(self, progress_bar, current, total):
+        progress_bar["maximum"] = total
+        progress_bar["value"] = current
+        progress_bar.update()
 
-# GUI Setup
-root = tk.Tk()
-root.title("Music Downloader")
-root.geometry('1000x800')
+    def _signal_completion(self, frame, label, progress_bar, title):
+        label.config(text=f"{title} - Complete!")
+        progress_bar.destroy()
+        self.root.after(3000, frame.destroy)
 
-#Styling
-label_style = {"bg": "#4e4e4e", "fg": "white", "font": ("Arial", 12, "bold")}
-entry_style = {"bg": "#3c3c3c", "fg": "white", "font": ("Arial", 12), "insertbackground": "white"}
+    def start_download(self):
+        url = self.entry_url.get()
+        download_path = self.download_path_entry.get()
+        if not download_path:
+            download_path = os.getenv("SONGS_PATH") or "./songs/"
+        else:
+            if not os.path.exists(download_path):
+                os.makedirs(download_path)
+        self.downloader.download_path = download_path
 
-#load background
-background_image = Image.open("imgs/1920x1080-aesthetic-glrfk0ntspz3tvxg.jpg")
-background_image = background_image.resize((1920,1080))
-bg_image = ImageTk.PhotoImage(background_image)
+        if "playlist" in url:
+            total_update_progress, total_signal_completion = self.create_progress_bar("Playlist Download")
+            threading.Thread(target=self.downloader.download_playlist_async,
+                             args=(url, self.create_progress_bar, total_update_progress, total_signal_completion)
+                             ).start()
+        else:
+            track_update_progress, track_signal_completion = self.create_progress_bar("Track Download")
+            threading.Thread(target=self.downloader.download_track_async,
+                             args=(url, track_update_progress, track_signal_completion)
+                             ).start()
 
-# Create a label for background
-# Create a Label for the background
-background_label = tk.Label(root, image=bg_image)
-background_label.place(x=0, y=0, relwidth=1, relheight=1)
+    def search_songs(self):
+        query = self.search_entry.get()
+        results = self.downloader.search_tracks(query)
 
-# Create the main label for the application
-main_label = tk.Label(root, text="Music Downloader (by dj fdjesko)", **label_style)
-main_label.pack(pady=(20, 10))
+        for widget in self.results_frame.winfo_children():
+            widget.destroy()
 
-# Label and entry box for Spotify URL
-url_label = tk.Label(root, text="Spotify URL", **label_style)
-url_label.pack()
+        for track in results:
+            self.create_result_row(track)
 
-entry_url = tk.StringVar()
-entry_urlbox = tk.Entry(root, width=100, textvariable=entry_url, **entry_style)
-entry_urlbox.pack(pady = (20, 10))
+    def create_result_row(self, track):
+        row_frame = tk.Frame(self.results_frame)
+        row_frame.pack(fill='x', pady=5)
 
-# Label and entry box for download path
-path_label = tk.Label(root, text="Download Path", **label_style)
-path_label.pack(pady=(20, 10))
+        name = track['name']
+        artist = track['artists'][0]['name']
+        url = track['external_urls']['spotify']
 
-downloadpath = tk.StringVar()  # Now a StringVar to store the path
-downloadpathbox = tk.Entry(root, width=100, textvariable=downloadpath, **label_style)  # Entry box for path
-downloadpathbox.pack()
+        info_label = tk.Label(row_frame, text=f"{name} by {artist}", anchor='w')
+        info_label.pack(side='left', padx=5)
 
-# Label to display download status
-download_label = tk.Label(root, text="", **label_style)  # Unique label for status updates
-download_label.pack(pady=(20, 10))
+        select_button = tk.Button(row_frame, text="Select", command=lambda: self.set_download_url(url))
+        select_button.pack(side='right', padx=5)
 
-# Download button
-btn = tk.Button(root, text="Download", fg="green", command=clicked)
-btn.pack()
-
-# Progress bar for downloads
-Downloadbar = ttk.Progressbar(
-    root,
-    orient="horizontal",
-    mode="determinate",
-    length=300
-)
-Downloadbar.pack(pady=20)
-
-
-search_label = tk.Label(root, text="Search songs on spotify", **label_style)
-search_label.pack(pady=(20, 10))
-
-search_labelbox = tk.StringVar()
-search_labelbox = tk.Entry(root, width=100, textvariable=search_labelbox, **entry_style)
-search_labelbox.pack(pady=(20, 10))
-
-btn = tk.Button(root, text="Search", fg="blue", command=searchsongclicked)
-btn.pack()
-
-results_text = tk.Text(root, width=50, height=15,**entry_style)
-results_text.pack(pady=10)
-
-
-# Start the GUI event loop
-root.mainloop()
+    def set_download_url(self, url):
+        self.entry_url.delete(0, tk.END)
+        self.entry_url.insert(0, url)
