@@ -1,11 +1,54 @@
-import threading
 import tkinter as tk
 from tkinter import ttk
-from tkinter.tix import WINDOW
-from redis.cluster import command
-from main import analyzeUrl
-from main import searchsong
 from PIL import Image, ImageTk
+from redis.cluster import command
+
+from downloader import Downloader
+from dotenv import load_dotenv
+import os
+import threading
+
+class MusicDownloaderGUI:
+    def __init__(self, root):
+        load_dotenv()
+        songs_path = os.getenv("SONGS_PATH") or "./songs/"
+        if not os.path.exists(songs_path):
+            os.mkdir(songs_path)
+
+        # GUI Setup
+        self.root = root
+        self.root.title("Music Downloader")
+        self.root.geometry('1000x800')
+
+        #create canvas and scrollbar
+        self.canvas = tk.Canvas(root)
+        self.scrollbar = ttk.Scrollbar(root, orient="vertical", command=self.canvas.yview)
+        self.scrollbar_frame = tk.Frame(self.canvas)
+
+        self.scrollbar_frame.bind(
+            "<Configure>",
+            lambda e:self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
+            )
+        )
+
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.scrollbar.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="both", expand=True)
+
+        self.downloader = Downloader(songs_path)
+        self.setup_ui()
+
+    def setup_ui(self):
+        self.label_style
+
+
+
+
+
+
 
 # Initialize global download thread
 download_thread = None
