@@ -62,24 +62,47 @@ class MusicDownloaderGUI:
         self.create_section_label("Download Path", x=100, y=160)
         self.download_path_entry = self.create_entry(x=100, y=200)
 
-        tk.Button(
-            self.canvas, text="Download", fg="green", command=self.start_download
-        ).place(x=100, y=240)
+        # Download Button
+        download_button = tk.Button(
+            self.canvas,
+            text="Download",
+            fg="white",  # White text for contrast
+            bg="#4CAF50",  # Green background for 'Download'
+            font=("Arial", 10, "bold"),  # Smaller font size for a more compact button
+            relief="solid",  # Solid border for rounded corners
+            borderwidth=2,  # Set the border width to create a rounded effect
+            padx=10,  # Horizontal padding inside the button
+            pady=5,  # Vertical padding inside the button
+            command=self.start_download
+        )
+        download_button.place(x=100, y=240)
+
 
         # Search Section
         self.create_section_label("Search songs on Spotify", x=100, y=300)
         self.search_entry = self.create_entry(x=100, y=340)
 
-        tk.Button(
-            self.canvas, text="Search", fg="blue", command=self.search_songs
-        ).place(x=100, y=380)
+        # Search Button
+        search_button = tk.Button(
+            self.canvas,
+            text="Search",
+            fg="white",  # White text for contrast
+            bg="#007BFF",  # Blue background for 'Search'
+            font=("Arial", 10, "bold"),  # Smaller font size for a more compact button
+            relief="solid",  # Solid border for rounded corners
+            borderwidth=2,  # Set the border width to create a rounded effect
+            padx=10,  # Horizontal padding inside the button
+            pady=5,  # Vertical padding inside the button
+            command=self.search_songs
+        )
+        search_button.place(x=100, y=380)
 
 
         # Results Section: Create a canvas with a scrollbar
-        self.results_canvas = tk.Canvas(self.canvas, bg=None)
+        self.results_canvas = tk.Canvas(self.canvas, bg="#3c3c3c")
         self.results_scrollbar = tk.Scrollbar(self.canvas, orient="vertical", command=self.results_canvas.yview)
         self.results_canvas.configure(yscrollcommand=self.results_scrollbar.set)
-        self.results_scrollable_frame = tk.Frame(self.results_canvas,bg=None)  # Frame inside the canvas to hold results
+        self.results_scrollable_frame = tk.Frame(self.results_canvas,bg="#3c3c3c")  # Frame inside the canvas to hold results
         self.results_canvas.create_window((0, 0), window=self.results_scrollable_frame, anchor="nw")
 
         # Place the canvas and scrollbar
@@ -162,19 +185,56 @@ class MusicDownloaderGUI:
         self.results_canvas.configure(scrollregion=self.results_canvas.bbox("all"))
 
     def create_result_row(self, track):
-        """Creates a row for a search result."""
-        row_frame = tk.Frame(self.results_scrollable_frame, bg=None)  # Transparent background
-        row_frame.pack(fill="x", pady=5, anchor="w")
+        """Creates a row for a search result with transparent background and rounded corners."""
+        row_frame = tk.Frame(self.results_scrollable_frame, bg="#3c3c3c")  # Transparent background
+        row_frame.pack(fill="x", pady=5, padx=10)
 
+        # Create a rounded label-style button inside the frame
         name = track["name"]
         artist = track["artists"][0]["name"]
         url = track["external_urls"]["spotify"]
 
-        info_label = tk.Label(row_frame, text=f"{name} by {artist}", anchor="w", fg="white", bg="#3c3c3c")
-        info_label.pack(side="left", padx=5)
+        # Add a label to show the song info, without a background (transparent)
+        info_label = tk.Label(
+            row_frame,
+            text=f"{name} by {artist}",
+            anchor="w",
+            fg="white",
+            bg="#3c3c3c",  # Transparent background
+            font=("Arial", 12)
+        )
+        info_label.pack(side="left", padx=10)
 
-        select_button = tk.Button(row_frame, text="Select", command=lambda: self.set_download_url(url))
+        # Create the "Select" button, also with rounded styling
+        select_button = tk.Button(
+            row_frame,
+            text="Select",
+            command=lambda: self.set_download_url(url),
+            fg="white",
+            bg="#1db954",  # Spotify green color for the button
+            font=("Arial", 12),
+            relief="flat",  # Flat button style
+            padx=10,
+            pady=5
+        )
         select_button.pack(side="right", padx=5)
+
+        # Apply rounded corners effect for the row and the button
+        self.make_rounded(row_frame)
+        self.make_rounded(select_button)
+
+    def make_rounded(self, widget):
+        """Apply rounded corners effect to a widget."""
+        widget.config(highlightbackground="black", highlightcolor="black", bd=0)
+        widget.update_idletasks()
+
+        # Create an oval shape or rounded corners effect using a canvas if needed
+        widget.config(
+            relief="solid",  # Adds a solid border to simulate rounded edges
+            bd=2,
+            highlightthickness=2
+        )
+
 
     def set_download_url(self, url):
         """Set the selected song's URL into the entry field."""
