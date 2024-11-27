@@ -154,6 +154,9 @@ class MusicDownloaderGUI:
         for track in results:
             self.create_result_row(track)
 
+            # Update the scroll region to fit the content
+        self.results_canvas.configure(scrollregion=self.results_canvas.bbox("all"))
+
     def on_results_canvas_configure(self, event):
         """Update the scroll region of the canvas to match the content size."""
         self.results_canvas.configure(scrollregion=self.results_canvas.bbox("all"))
@@ -161,7 +164,7 @@ class MusicDownloaderGUI:
     def create_result_row(self, track):
         """Creates a row for a search result."""
         row_frame = tk.Frame(self.results_scrollable_frame, bg=None)  # Transparent background
-        row_frame.pack(fill="x", pady=5)
+        row_frame.pack(fill="x", pady=5, anchor="w")
 
         name = track["name"]
         artist = track["artists"][0]["name"]
