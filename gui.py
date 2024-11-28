@@ -53,7 +53,7 @@ class MusicDownloaderGUI:
             padx=10,  # Padding inside the label
             pady=10
         )
-        main_label.place(x=400, y=20)
+        main_label.pack(anchor="n", pady=20)
 
         # Download Section
         self.create_section_label("Spotify URL", x=100, y=80)
@@ -69,8 +69,6 @@ class MusicDownloaderGUI:
             fg="white",  # White text for contrast
             bg="#4CAF50",  # Green background for 'Download'
             font=("Arial", 10, "bold"),  # Smaller font size for a more compact button
-            relief="solid",  # Solid border for rounded corners
-            borderwidth=2,  # Set the border width to create a rounded effect
             padx=10,  # Horizontal padding inside the button
             pady=5,  # Vertical padding inside the button
             command=self.start_download
@@ -89,8 +87,6 @@ class MusicDownloaderGUI:
             fg="white",  # White text for contrast
             bg="#007BFF",  # Blue background for 'Search'
             font=("Arial", 10, "bold"),  # Smaller font size for a more compact button
-            relief="solid",  # Solid border for rounded corners
-            borderwidth=2,  # Set the border width to create a rounded effect
             padx=10,  # Horizontal padding inside the button
             pady=5,  # Vertical padding inside the button
             command=self.search_songs
@@ -99,7 +95,7 @@ class MusicDownloaderGUI:
 
 
         # Results Section: Create a canvas with a scrollbar
-        self.results_canvas = tk.Canvas(self.canvas, bg="#3c3c3c")
+        self.results_canvas = tk.Canvas(self.canvas, bg="#3c3c3c", highlightthickness=0)
         self.results_scrollbar = tk.Scrollbar(self.canvas, orient="vertical", command=self.results_canvas.yview)
         self.results_canvas.configure(yscrollcommand=self.results_scrollbar.set)
         self.results_scrollable_frame = tk.Frame(self.results_canvas,bg="#3c3c3c")  # Frame inside the canvas to hold results
@@ -114,7 +110,7 @@ class MusicDownloaderGUI:
 
         # Download Progress Section
         self.create_section_label("Download Progress", x=600, y=80)
-        self.download_bars_frame = tk.Frame(self.canvas, bg=None)
+        self.download_bars_frame = tk.Frame(self.canvas, bg="#3c3c3c")
         self.download_bars_frame.place(x=600, y=120)
 
     def create_section_label(self, text, x, y):
@@ -127,8 +123,6 @@ class MusicDownloaderGUI:
             bg="#3c3c3c",  # Dark background to improve contrast
             padx=5,  # Add some padding inside the label
             pady=5,
-            relief="solid",  # Optional: Adds a border for emphasis
-            borderwidth=2
         )
         label.place(x=x, y=y)
 
@@ -228,13 +222,6 @@ class MusicDownloaderGUI:
         widget.config(highlightbackground="black", highlightcolor="black", bd=0)
         widget.update_idletasks()
 
-        # Create an oval shape or rounded corners effect using a canvas if needed
-        widget.config(
-            relief="solid",  # Adds a solid border to simulate rounded edges
-            bd=2,
-            highlightthickness=2
-        )
-
 
     def set_download_url(self, url):
         """Set the selected song's URL into the entry field."""
@@ -268,6 +255,11 @@ class MusicDownloaderGUI:
 
     def _signal_completion(self, frame, label, progress_bar, title):
         """Signal download completion."""
-        label.config(text=f"{title} - Complete!")
+        frame.config(bg="#3c3c3c")  # Match the background of other UI components
+        label.config(
+            text=f"{title} - Complete!",
+            fg="white",
+            bg="#3c3c3c"  # Match the background of other UI components
+        )
         progress_bar.destroy()
         self.root.after(3000, frame.destroy)
