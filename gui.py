@@ -1,20 +1,30 @@
+import json
 import tkinter as tk
 from tkinter import ttk
+
 from PIL import Image, ImageTk
 import os
 from dotenv import load_dotenv
+
+
 from downloader import Downloader
 import threading
+import tkinter.filedialog as filedialog
+
+
+SETTINGS_PATH = "./settings.json"
 
 
 class MusicDownloaderGUI:
-    def __init__(self, root):
+    def __init__(self, root: tk.Tk):
+
         # Load environment variables
         load_dotenv()
-        songs_path = os.getenv("SONGS_PATH") or "./songs/"
-        if not os.path.exists(songs_path):
-            os.mkdir(songs_path)
 
+        # Default Settings
+        self.songs_path = "songs"
+
+        # Root Settings
         self.root = root
         self.root.title("Music Downloader")
 
@@ -35,14 +45,44 @@ class MusicDownloaderGUI:
         self.canvas.pack(fill="both", expand=True)
         self.canvas.create_image(0, 0, image=self.bg_image_resized, anchor="nw")
 
+        # Load settings
+        self.load_settings()
+
         # Downloader instance
-        self.downloader = Downloader(songs_path)
+        self.downloader = Downloader(self.songs_path)
 
         # Set up the UI
         self.setup_ui()
+        self.root.protocol("WM_DELETE_WINDOW", self.quit)
+
+    def quit(self):
+        self.save_settings()
+        self.root.quit()
+
+    def load_settings(self):
+        if not os.path.exists(SETTINGS_PATH):
+            print("Settings file not found")
+            return
+
+        with open(SETTINGS_PATH, "r") as f:
+            json_data: dict = json.load(f)
+            self.songs_path = json_data["songs_path"]
+            print("Settings loaded")
+
+    def save_settings(self):
+        with open(SETTINGS_PATH, "w") as f:
+            data = {
+                "songs_path": self.songs_path
+            }
+            json.dump(data, f, indent=4)
+            print("Settings saved")
 
     def setup_ui(self):
         """Set up the main UI components."""
+        if not os.path.exists(self.songs_path):
+            os.makedirs(self.songs_path)  # Create the directory if it doesn't exist
+
+
         # Title Label
         main_label = tk.Label(
             self.canvas,
@@ -59,8 +99,6 @@ class MusicDownloaderGUI:
         self.create_section_label("Spotify URL", x=100, y=80)
         self.entry_url = self.create_entry(x=100, y=120)
 
-        self.create_section_label("Download Path", x=100, y=160)
-        self.download_path_entry = self.create_entry(x=100, y=200)
 
         # Download Button
         download_button = tk.Button(
@@ -75,6 +113,22 @@ class MusicDownloaderGUI:
         )
         download_button.place(x=100, y=240)
 
+        # Add the entry field with the default path
+        self.download_path_entry = self.create_entry(x=100, y=200)
+        self.download_path_entry.insert(0, self.songs_path)  # Set the default value
+
+        # Select default path
+        select_path = tk.Button(
+            self.canvas,
+            text="select path",
+            fg="white",  # White text for contrast
+            bg="#4CAF50",  # Green background for 'Download'
+            font=("Arial", 10, "bold"),  # Smaller font size for a more compact button
+            padx=10,  # Horizontal padding inside the button
+            pady=5,  # Vertical padding inside the button
+            command=self.select_path
+        )
+        select_path.place(x=100, y=155)
 
         # Search Section
         self.create_section_label("Search songs on Spotify", x=100, y=300)
@@ -134,15 +188,22 @@ class MusicDownloaderGUI:
         entry.place(x=x, y=y)
         return entry
 
+    def select_path(self):
+        folder_path = filedialog.askdirectory()
+        print(folder_path)
+        self.songs_path = folder_path
+        self.download_path_entry.delete(0, tk.END)
+        self.download_path_entry.insert(0, self.songs_path)
+
     def start_download(self):
         """Start downloading the song or playlist."""
         url = self.entry_url.get()
         download_path = self.download_path_entry.get()
         if not download_path:
-            download_path = os.getenv("SONGS_PATH") or "./songs/"
-        else:
-            if not os.path.exists(download_path):
-                os.makedirs(download_path)
+            download_path = self.songs_path
+
+        if not os.path.exists(download_path):
+            os.makedirs(download_path)
         self.downloader.download_path = download_path
 
         if "playlist" in url:
@@ -221,7 +282,6 @@ class MusicDownloaderGUI:
         """Apply rounded corners effect to a widget."""
         widget.config(highlightbackground="black", highlightcolor="black", bd=0)
         widget.update_idletasks()
-
 
     def set_download_url(self, url):
         """Set the selected song's URL into the entry field."""

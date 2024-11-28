@@ -5,3 +5,4 @@ songs/
 __pycache__/
 .cache
 .env
+settings.json
