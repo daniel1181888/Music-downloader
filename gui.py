@@ -28,6 +28,8 @@ class MusicDownloaderGUI:
         self.root = root
         self.root.title("Music Downloader")
 
+        self.active_progress_bars = []  # Initialize the list to track progress bars
+
         # Fixed window size
         self.window_width = 1000
         self.window_height = 700
@@ -60,13 +62,14 @@ class MusicDownloaderGUI:
         self.root.quit()
 
     def load_settings(self):
+        """Load settings from the JSON file."""
         if not os.path.exists(SETTINGS_PATH):
             print("Settings file not found")
             return
 
         with open(SETTINGS_PATH, "r") as f:
             json_data: dict = json.load(f)
-            self.songs_path = json_data["songs_path"]
+            self.songs_path = json_data.get("songs_path", self.songs_path)  # Use .get() to handle missing key
             print("Settings loaded")
 
     def save_settings(self):
@@ -79,8 +82,10 @@ class MusicDownloaderGUI:
 
     def setup_ui(self):
         """Set up the main UI components."""
-        if not os.path.exists(self.songs_path):
-            os.makedirs(self.songs_path)  # Create the directory if it doesn't exist
+        if not self.songs_path:
+            print("Download path is not set!")
+            return
+        os.makedirs(self.songs_path, exist_ok=True)
 
 
         # Title Label
@@ -189,11 +194,12 @@ class MusicDownloaderGUI:
         return entry
 
     def select_path(self):
+        """Opens a directory selection dialog and updates the path."""
         folder_path = filedialog.askdirectory()
-        print(folder_path)
-        self.songs_path = folder_path
-        self.download_path_entry.delete(0, tk.END)
-        self.download_path_entry.insert(0, self.songs_path)
+        if folder_path:  # Ensure a valid directory is selected
+            self.songs_path = folder_path
+            self.download_path_entry.delete(0, tk.END)
+            self.download_path_entry.insert(0, self.songs_path)  # Update entry field
 
     def start_download(self):
         """Start downloading the song or playlist."""
@@ -202,7 +208,7 @@ class MusicDownloaderGUI:
         if not download_path:
             download_path = self.songs_path
 
-        if not os.path.exists(download_path):
+        if not os.path.exists(download_path):  # Ensure path exists
             os.makedirs(download_path)
         self.downloader.download_path = download_path
 
@@ -299,27 +305,39 @@ class MusicDownloaderGUI:
         progress_bar = ttk.Progressbar(frame, orient="horizontal", mode="determinate", length=200)
         progress_bar.pack(side="left", padx=5)
 
+        # Store references for cleanup
+        self.active_progress_bars.append(frame)  # Ensure this list exists in __init__
+
         def update_progress(current, total):
-            self.root.after(0, lambda: self._update_progress_bar(progress_bar, current, total))
+            if progress_bar.winfo_exists():
+                self.root.after(0, lambda: self._update_progress_bar(progress_bar, current, total))
 
         def signal_completion():
-            self.root.after(0, lambda: self._signal_completion(frame, label, progress_bar, title))
+            if frame.winfo_exists():
+                self.root.after(0, lambda: self._signal_completion(frame, label, progress_bar, title))
 
         return update_progress, signal_completion
 
     def _update_progress_bar(self, progress_bar, current, total):
-        """Update progress bar state."""
-        progress_bar["maximum"] = total
-        progress_bar["value"] = current
-        progress_bar.update()
+        """Update the progress bar safely."""
+        if progress_bar.winfo_exists():  # Check if the widget exists
+            progress_bar["maximum"] = total
+            progress_bar["value"] = current
 
     def _signal_completion(self, frame, label, progress_bar, title):
-        """Signal download completion."""
-        frame.config(bg="#3c3c3c")  # Match the background of other UI components
-        label.config(
-            text=f"{title} - Complete!",
-            fg="white",
-            bg="#3c3c3c"  # Match the background of other UI components
-        )
-        progress_bar.destroy()
-        self.root.after(3000, frame.destroy)
+        """Signal the completion of a download safely."""
+        if frame.winfo_exists():  # Check if the frame still exists
+            frame.config(bg="#3c3c3c")  # Match the background of other UI components
+        if label.winfo_exists():  # Check if the label exists
+            label.config(fg="green", text=f"{title} - Completed")
+        if progress_bar.winfo_exists():  # Check if the progress bar exists
+            progress_bar.destroy()
+
+    def cleanup_widgets(self, frame):
+        """Clean up a widget safely."""
+        # Cancel all associated callbacks
+        self.root.after_cancel(self.root)  # Cancel callbacks if you store references
+
+        # Destroy the frame
+        if frame.winfo_exists():
+            frame.destroy()
