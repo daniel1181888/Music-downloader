@@ -169,7 +169,7 @@ class MusicDownloaderGUI:
 
         # Download Progress Section
         self.create_section_label("Download Progress", x=600, y=80)
-        self.download_bars_frame = tk.Frame(self.canvas, bg="#3c3c3c")
+        self.download_bars_frame = tk.Frame(self.canvas)  # Remove the background color here
         self.download_bars_frame.place(x=600, y=120)
 
     def create_section_label(self, text, x, y):
@@ -296,10 +296,12 @@ class MusicDownloaderGUI:
 
     def create_progress_bar(self, title):
         """Create and manage a download progress bar."""
-        frame = tk.Frame(self.download_bars_frame, bg=None)
+        frame = tk.Frame(self.download_bars_frame, bg="#3c3c3c")  # Add background color to individual frames
         frame.pack(fill="x", pady=5)
 
-        label = tk.Label(frame, text=title, anchor="w", fg="white", bg="#3c3c3c")
+        # Truncate title to first 10 characters and add ellipsis if needed
+        display_title = title[:10] + "..." if len(title) > 10 else title
+        label = tk.Label(frame, text=display_title, anchor="w", fg="white", bg="#3c3c3c", width=15)
         label.pack(side="left")
 
         progress_bar = ttk.Progressbar(frame, orient="horizontal", mode="determinate", length=200)
@@ -329,15 +331,30 @@ class MusicDownloaderGUI:
         if frame.winfo_exists():  # Check if the frame still exists
             frame.config(bg="#3c3c3c")  # Match the background of other UI components
         if label.winfo_exists():  # Check if the label exists
-            label.config(fg="green", text=f"{title} - Completed")
+            label.config(fg="green", text=f"{title[:10]}... - Done" if len(title) > 10 else f"{title} - Done")
         if progress_bar.winfo_exists():  # Check if the progress bar exists
             progress_bar.destroy()
+            
+        # Schedule removal of the frame after 3 seconds
+        self.root.after(3000, lambda: self.cleanup_widgets(frame))
 
     def cleanup_widgets(self, frame):
         """Clean up a widget safely."""
         # Cancel all associated callbacks
         self.root.after_cancel(self.root)  # Cancel callbacks if you store references
 
+        # Remove from active progress bars list
+        if frame in self.active_progress_bars:
+            self.active_progress_bars.remove(frame)
+
         # Destroy the frame
         if frame.winfo_exists():
             frame.destroy()
+            
+        # If this was the last progress bar, hide the parent frame
+        if not self.active_progress_bars:
+            self.download_bars_frame.place_forget()  # Remove from view completely
+            # Recreate the frame to ensure a clean state
+            self.download_bars_frame.destroy()
+            self.download_bars_frame = tk.Frame(self.canvas, width=300)  # Set a fixed width
+            self.download_bars_frame.place(x=600, y=120)
