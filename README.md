@@ -1,55 +1,56 @@
-Install FFmpeg:
+# Music Downloader
 
-You can download FFmpeg from the official site: https://ffmpeg.org/download.html
-Choose the appropriate build for your operating system (Windows, macOS, or Linux).
-Set Up FFmpeg:
+## Prerequisites
 
-Recommended Option
-Download the ffmpeg-master-latest-win64-gpl-shared.zip file (63.9 MB).
-https://github.com/BtbN/FFmpeg-Builds/releases
+1. **Install FFmpeg**:
+   - Download FFmpeg from the [official site](https://ffmpeg.org/download.html).
+   - Follow these steps to set up FFmpeg on your system:
+     - Windows: Add the extracted FFmpeg folder (e.g., `C:\ffmpeg\bin`) to your system's PATH environment variable.
+     - macOS/Linux: Install FFmpeg using Homebrew or download and configure it manually:
+       ```bash
+       brew install ffmpeg
+       ```
+   - Verify the installation by running:
+     ```bash
+     ffmpeg -version
+     ```
+   - Ensure FFmpeg is accessible globally.
 
-After downloading and extracting FFmpeg, you'll need to add it to your system's PATH environment variable. This allows yt-dlp to find it.
-For Windows:
+2. **Install Python**:
+   - Make sure Python 3.8 or higher is installed on your system. You can download it from [python.org](https://www.python.org/).
 
-- Locate the folder where you extracted FFmpeg (it should contain ffmpeg.exe, ffprobe.exe, etc.).
+## Installation
 
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/daniel1181888/Music-downloader.git
+   cd Music-downloader
+   ```
+    Install Python Dependencies:
+        Install the required Python libraries using pip:
+    ```bash
+    pip install -r requirements.txt
+    ```
+Set Up Spotify API Credentials:
 
-- Copy the path to this folder (e.g., C:\ffmpeg\bin).
+    Create a .env file in the root directory:
+    plaintext
 
+        CLIENT_ID=your_spotify_client_id
+        CLIENT_SECRET=your_spotify_client_secret
 
-- Copy the path to this folder (e.g., C:\ffmpeg\bin).
+        Replace your_spotify_client_id and your_spotify_client_secret with your Spotify Developer credentials. You can obtain these by creating an app at the Spotify Developer Dashboard.
 
+Running the Application
 
-- Right-click on "This PC" or "My Computer" and select Properties.
+    Run the Program:
+        Start the Music Downloader GUI:
+        bash
 
+    python main.py
 
-- Click on Advanced system settings.
+Using the Application:
 
+    Enter a Spotify playlist URL or track URL.
+    Click the "Download" button to start downloading tracks.
 
-- In the System Properties window, click the Environment Variables button.
-
-
-- In the System variables section, find the Path variable, select it, and click Edit.
-
-
-- Click New and paste the path to the FFmpeg bin folder.
-
-
-- Click OK to close all dialogs.
-
-
-For macOS/Linux:
-
-If you're using Homebrew, you can install FFmpeg by running:
-bash
-Code kopiëren
-brew install ffmpeg
-Alternatively, download FFmpeg and follow the instructions in the README for installation.
-Verify FFmpeg Installation:
-
-Open a command prompt or terminal window.
-Type ffmpeg -version and press Enter.
-If it’s installed correctly, you should see version information for FFmpeg.
-Run Your Script Again:
-
-After completing the steps above, try running your Python script again. It should be able to find FFmpeg and process the audio files without throwing the previous error.
