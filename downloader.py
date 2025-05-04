@@ -19,10 +19,11 @@ class Downloader:
         Args:
             download_path (str): The directory where songs will be downloaded.
         """
+
         self.download_path = download_path
         self.spotify_client = SpotifyClient()
         self.metadata_manager = MetadataManager()
-        self.executor = ThreadPoolExecutor(max_threads)  # Thread pool with a maximum number of threads
+        self.executor = ThreadPoolExecutor(max_workers=10)
 
 
 
@@ -97,49 +98,49 @@ class Downloader:
         if update_progress:
             update_progress(1, 1)
 
-     def download_playlist(self, playlist_url, create_progress_bar, total_update_progress, total_signal_completion):
-            """
-            Download all tracks in a Spotify playlist URL using the thread pool.
-    
-            Args:
-                playlist_url (str): The Spotify URL of the playlist.
-                create_progress_bar (function): Function to create progress bars.
-                total_update_progress (function): Function to update total progress.
-                total_signal_completion (function): Function to signal total completion.
-            """
-            tracks = self.spotify_client.get_playlist_tracks(playlist_url)
-            total_tracks = len(tracks)
-    
-            # Initialize total progress
-            total_update_progress(0, total_tracks)
-    
-            completed_tracks = 0
-    
-            def track_completed():
-                nonlocal completed_tracks
-                completed_tracks += 1
-                total_update_progress(completed_tracks, total_tracks)
-                if completed_tracks == total_tracks:
-                    total_signal_completion()
-    
-            for item in tracks:
-                track = item['track']
-                track_url = track['external_urls']['spotify']
-                song_name = track['name']
-                artist_name = track['artists'][0]['name']
-    
-                # Create progress bar for the track
-                track_title = f"{song_name} by {artist_name}"
-                track_update_progress, track_signal_completion = create_progress_bar(track_title)
-    
-                # Submit the download task to the thread pool
-                self.executor.submit(
-                    self._download_track_wrapper,
-                    track_url,
-                    track_update_progress,
-                    track_signal_completion,
-                    track_completed
-                )
+    def download_playlist(self, playlist_url, create_progress_bar, total_update_progress, total_signal_completion):
+        """
+        Download all tracks in a Spotify playlist URL using the thread pool.
+
+        Args:
+            playlist_url (str): The Spotify URL of the playlist.
+            create_progress_bar (function): Function to create progress bars.
+            total_update_progress (function): Function to update total progress.
+            total_signal_completion (function): Function to signal total completion.
+        """
+        tracks = self.spotify_client.get_playlist_tracks(playlist_url)
+        total_tracks = len(tracks)
+
+        # Initialize total progress
+        total_update_progress(0, total_tracks)
+
+        completed_tracks = 0
+
+        def track_completed():
+            nonlocal completed_tracks
+            completed_tracks += 1
+            total_update_progress(completed_tracks, total_tracks)
+            if completed_tracks == total_tracks:
+                total_signal_completion()
+
+        for item in tracks:
+            track = item['track']
+            track_url = track['external_urls']['spotify']
+            song_name = track['name']
+            artist_name = track['artists'][0]['name']
+
+            # Create progress bar for the track
+            track_title = f"{song_name} by {artist_name}"
+            track_update_progress, track_signal_completion = create_progress_bar(track_title)
+
+            # Submit the download task to the thread pool
+            self.executor.submit(
+                self._download_track_wrapper,
+                track_url,
+                track_update_progress,
+                track_signal_completion,
+                track_completed
+            )
 
     def _download_track_wrapper(self, track_url, update_progress, signal_completion, track_completed):
         """

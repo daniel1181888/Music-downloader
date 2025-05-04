@@ -202,35 +202,35 @@ class MusicDownloaderGUI:
             self.download_path_entry.delete(0, tk.END)
             self.download_path_entry.insert(0, self.songs_path)  # Update entry field
 
-   def start_download(self):
-    """Start downloading the song or playlist."""
-    url = self.entry_url.get()
-    download_path = self.download_path_entry.get()
-    if not download_path:
-        download_path = self.songs_path
+    def start_download(self):
+        """Start downloading the song or playlist."""
+        url = self.entry_url.get()
+        download_path = self.download_path_entry.get()
+        if not download_path:
+            download_path = self.songs_path
 
-    if not os.path.exists(download_path):  # Ensure path exists
-        os.makedirs(download_path)
-    self.downloader.download_path = download_path
+        if not os.path.exists(download_path):  # Ensure path exists
+            os.makedirs(download_path)
+        self.downloader.download_path = download_path
 
-    if "playlist" in url:
-        total_update_progress, total_signal_completion = self.create_progress_bar("Playlist Download")
-        # Submit playlist download to the executor
-        self.downloader.executor.submit(
-            self.downloader.download_playlist,
-            url,
-            self.create_progress_bar,
-            total_update_progress,
-            total_signal_completion
-        )
-    else:
-        track_update_progress, track_signal_completion = self.create_progress_bar("Track Download")
-        # Submit single track download to the executor
-        self.downloader.executor.submit(
-            self.downloader.download_track,
-            url,
-            track_update_progress
-        )
+        if "playlist" in url:
+            total_update_progress, total_signal_completion = self.create_progress_bar("Playlist Download")
+            # Submit playlist download to the executor
+            self.downloader.executor.submit(
+                self.downloader.download_playlist,
+                url,
+                self.create_progress_bar,
+                total_update_progress,
+                total_signal_completion
+            )
+        else:
+            track_update_progress, track_signal_completion = self.create_progress_bar("Track Download")
+            # Submit single track download to the executor
+            self.downloader.executor.submit(
+                self.downloader.download_track,
+                url,
+                track_update_progress
+            )
 
     def search_songs(self):
         """Search for songs on Spotify."""
