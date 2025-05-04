@@ -302,6 +302,8 @@ class MusicDownloaderGUI:
                 self.downloader = Downloader(self.config.download_path)
                 top.destroy()
 
+        top.protocol("WM_DELETE_WINDOW", close_app)
+
         # Create two buttons side by side in the button frame
         # Close button
         close_button = tk.Button(
