@@ -6,6 +6,7 @@ from spotify_client import SpotifyClient
 from concurrent.futures import ThreadPoolExecutor
 from metadata import MetadataManager
 
+
 class Downloader:
     """
     Class to download music tracks or playlists from Spotify URLs.
@@ -25,8 +26,6 @@ class Downloader:
         self.metadata_manager = MetadataManager()
         self.executor = ThreadPoolExecutor(max_workers=10)
 
-
-
     @staticmethod
     def sanitize_filename(filename):
         """
@@ -38,7 +37,7 @@ class Downloader:
         Returns:
             str: The sanitized filename.
         """
-        return re.sub(r'[<>:"/\\|?*]', '', filename)
+        return re.sub(r'[<>:"/\\|?*]', "", filename)
 
     def download_song(self, song_name, artist_name):
         """
@@ -57,15 +56,17 @@ class Downloader:
         sanitized_name = self.sanitize_filename(f"{song_name} - {artist_name}")
         output_template = os.path.join(self.download_path, f"{sanitized_name}.%(ext)s")
         ydl_opts = {
-            'format': 'bestaudio/best',
-            'outtmpl': output_template,
-            'quiet': True,
-            'no_warnings': True,
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-                }],
+            "format": "bestaudio/best",
+            "outtmpl": output_template,
+            "quiet": True,
+            "no_warnings": True,
+            "postprocessors": [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                }
+            ],
         }
         search_query = f"ytsearch:{song_name} {artist_name}"
         try:
@@ -84,21 +85,29 @@ class Downloader:
             update_progress (function, optional): Function to update progress.
         """
         track_info = self.spotify_client.get_track_info(track_url)
-        song_name = track_info['name']
-        artist_name = track_info['artists'][0]['name']
-        album_name = track_info['album']['name']
-        album_art_url = track_info['album']['images'][0]['url']
+        song_name = track_info["name"]
+        artist_name = track_info["artists"][0]["name"]
+        album_name = track_info["album"]["name"]
+        album_art_url = track_info["album"]["images"][0]["url"]
 
         if update_progress:
             update_progress(0, 1)
 
         file_path = self.download_song(song_name, artist_name)
-        self.metadata_manager.add_metadata(file_path, song_name, artist_name, album_name, album_art_url)
+        self.metadata_manager.add_metadata(
+            file_path, song_name, artist_name, album_name, album_art_url
+        )
 
         if update_progress:
             update_progress(1, 1)
 
-    def download_playlist(self, playlist_url, create_progress_bar, total_update_progress, total_signal_completion):
+    def download_playlist(
+        self,
+        playlist_url,
+        create_progress_bar,
+        total_update_progress,
+        total_signal_completion,
+    ):
         """
         Download all tracks in a Spotify playlist URL using the thread pool.
 
@@ -124,14 +133,16 @@ class Downloader:
                 total_signal_completion()
 
         for item in tracks:
-            track = item['track']
-            track_url = track['external_urls']['spotify']
-            song_name = track['name']
-            artist_name = track['artists'][0]['name']
+            track = item["track"]
+            track_url = track["external_urls"]["spotify"]
+            song_name = track["name"]
+            artist_name = track["artists"][0]["name"]
 
             # Create progress bar for the track
             track_title = f"{song_name} by {artist_name}"
-            track_update_progress, track_signal_completion = create_progress_bar(track_title)
+            track_update_progress, track_signal_completion = create_progress_bar(
+                track_title
+            )
 
             # Submit the download task to the thread pool
             self.executor.submit(
@@ -139,10 +150,12 @@ class Downloader:
                 track_url,
                 track_update_progress,
                 track_signal_completion,
-                track_completed
+                track_completed,
             )
 
-    def _download_track_wrapper(self, track_url, update_progress, signal_completion, track_completed):
+    def _download_track_wrapper(
+        self, track_url, update_progress, signal_completion, track_completed
+    ):
         """
         Wrapper function to download a track and handle completion signals.
 
@@ -165,7 +178,7 @@ class Downloader:
         Shutdown the thread pool executor gracefully.
         """
         self.executor.shutdown(wait=True)
-                
+
     def download_track_async(self, track_url, update_progress, signal_completion):
         """
         Asynchronously download a single track.
@@ -175,6 +188,7 @@ class Downloader:
             update_progress (function): Function to update progress.
             signal_completion (function): Function to signal completion.
         """
+
         def run():
             try:
                 self.download_track(track_url, update_progress)
@@ -185,7 +199,13 @@ class Downloader:
 
         threading.Thread(target=run).start()
 
-    def download_playlist_async(self, playlist_url, create_progress_bar, total_update_progress, total_signal_completion):
+    def download_playlist_async(
+        self,
+        playlist_url,
+        create_progress_bar,
+        total_update_progress,
+        total_signal_completion,
+    ):
         """
         Asynchronously download a playlist.
 
@@ -195,8 +215,15 @@ class Downloader:
             total_update_progress (function): Function to update total progress.
             total_signal_completion (function): Function to signal total completion.
         """
-        threading.Thread(target=self.download_playlist, args=(playlist_url, create_progress_bar,
-                                                              total_update_progress, total_signal_completion)).start()
+        threading.Thread(
+            target=self.download_playlist,
+            args=(
+                playlist_url,
+                create_progress_bar,
+                total_update_progress,
+                total_signal_completion,
+            ),
+        ).start()
 
     def search_tracks(self, query, limit=10):
         """

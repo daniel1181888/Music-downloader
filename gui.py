@@ -43,7 +43,9 @@ class MusicDownloaderGUI:
         )
 
         # Create canvas and add background image
-        self.canvas = tk.Canvas(self.root, width=self.window_width, height=self.window_height)
+        self.canvas = tk.Canvas(
+            self.root, width=self.window_width, height=self.window_height
+        )
         self.canvas.pack(fill="both", expand=True)
         self.canvas.create_image(0, 0, image=self.bg_image_resized, anchor="nw")
 
@@ -70,14 +72,14 @@ class MusicDownloaderGUI:
 
         with open(SETTINGS_PATH, "r") as f:
             json_data: dict = json.load(f)
-            self.songs_path = json_data.get("songs_path", self.songs_path)  # Use .get() to handle missing key
+            self.songs_path = json_data.get(
+                "songs_path", self.songs_path
+            )  # Use .get() to handle missing key
             print("Settings loaded")
 
     def save_settings(self):
         with open(SETTINGS_PATH, "w") as f:
-            data = {
-                "songs_path": self.songs_path
-            }
+            data = {"songs_path": self.songs_path}
             json.dump(data, f, indent=4)
             print("Settings saved")
 
@@ -88,7 +90,6 @@ class MusicDownloaderGUI:
             return
         os.makedirs(self.songs_path, exist_ok=True)
 
-
         # Title Label
         main_label = tk.Label(
             self.canvas,
@@ -97,14 +98,13 @@ class MusicDownloaderGUI:
             font=("Arial", 16, "bold"),
             bg="#3c3c3c",  # Dark background to improve contrast
             padx=10,  # Padding inside the label
-            pady=10
+            pady=10,
         )
         main_label.pack(anchor="n", pady=20)
 
         # Download Section
         self.create_section_label("Spotify URL", x=100, y=80)
         self.entry_url = self.create_entry(x=100, y=120)
-
 
         # Download Button
         download_button = tk.Button(
@@ -115,7 +115,7 @@ class MusicDownloaderGUI:
             font=("Arial", 10, "bold"),  # Smaller font size for a more compact button
             padx=10,  # Horizontal padding inside the button
             pady=5,  # Vertical padding inside the button
-            command=self.start_download
+            command=self.start_download,
         )
         download_button.place(x=100, y=240)
 
@@ -132,7 +132,7 @@ class MusicDownloaderGUI:
             font=("Arial", 10, "bold"),  # Smaller font size for a more compact button
             padx=10,  # Horizontal padding inside the button
             pady=5,  # Vertical padding inside the button
-            command=self.select_path
+            command=self.select_path,
         )
         select_path.place(x=100, y=155)
 
@@ -149,17 +149,22 @@ class MusicDownloaderGUI:
             font=("Arial", 10, "bold"),  # Smaller font size for a more compact button
             padx=10,  # Horizontal padding inside the button
             pady=5,  # Vertical padding inside the button
-            command=self.search_songs
+            command=self.search_songs,
         )
         search_button.place(x=100, y=380)
 
-
         # Results Section: Create a canvas with a scrollbar
         self.results_canvas = tk.Canvas(self.canvas, bg="#3c3c3c", highlightthickness=0)
-        self.results_scrollbar = tk.Scrollbar(self.canvas, orient="vertical", command=self.results_canvas.yview)
+        self.results_scrollbar = tk.Scrollbar(
+            self.canvas, orient="vertical", command=self.results_canvas.yview
+        )
         self.results_canvas.configure(yscrollcommand=self.results_scrollbar.set)
-        self.results_scrollable_frame = tk.Frame(self.results_canvas,bg="#3c3c3c")  # Frame inside the canvas to hold results
-        self.results_canvas.create_window((0, 0), window=self.results_scrollable_frame, anchor="nw")
+        self.results_scrollable_frame = tk.Frame(
+            self.results_canvas, bg="#3c3c3c"
+        )  # Frame inside the canvas to hold results
+        self.results_canvas.create_window(
+            (0, 0), window=self.results_scrollable_frame, anchor="nw"
+        )
 
         # Place the canvas and scrollbar
         self.results_canvas.place(x=100, y=430, width=800, height=150)
@@ -189,7 +194,12 @@ class MusicDownloaderGUI:
     def create_entry(self, x, y):
         """Creates a styled entry field."""
         entry = tk.Entry(
-            self.canvas, width=50, bg="#3c3c3c", fg="white", font=("Arial", 12), insertbackground="white"
+            self.canvas,
+            width=50,
+            bg="#3c3c3c",
+            fg="white",
+            font=("Arial", 12),
+            insertbackground="white",
         )
         entry.place(x=x, y=y)
         return entry
@@ -214,22 +224,24 @@ class MusicDownloaderGUI:
         self.downloader.download_path = download_path
 
         if "playlist" in url:
-            total_update_progress, total_signal_completion = self.create_progress_bar("Playlist Download")
+            total_update_progress, total_signal_completion = self.create_progress_bar(
+                "Playlist Download"
+            )
             # Submit playlist download to the executor
             self.downloader.executor.submit(
                 self.downloader.download_playlist,
                 url,
                 self.create_progress_bar,
                 total_update_progress,
-                total_signal_completion
+                total_signal_completion,
             )
         else:
-            track_update_progress, track_signal_completion = self.create_progress_bar("Track Download")
+            track_update_progress, track_signal_completion = self.create_progress_bar(
+                "Track Download"
+            )
             # Submit single track download to the executor
             self.downloader.executor.submit(
-                self.downloader.download_track,
-                url,
-                track_update_progress
+                self.downloader.download_track, url, track_update_progress
             )
 
     def search_songs(self):
@@ -254,7 +266,9 @@ class MusicDownloaderGUI:
 
     def create_result_row(self, track):
         """Creates a row for a search result with transparent background and rounded corners."""
-        row_frame = tk.Frame(self.results_scrollable_frame, bg="#3c3c3c")  # Transparent background
+        row_frame = tk.Frame(
+            self.results_scrollable_frame, bg="#3c3c3c"
+        )  # Transparent background
         row_frame.pack(fill="x", pady=5, padx=10)
 
         # Create a rounded label-style button inside the frame
@@ -269,7 +283,7 @@ class MusicDownloaderGUI:
             anchor="w",
             fg="white",
             bg="#3c3c3c",  # Transparent background
-            font=("Arial", 12)
+            font=("Arial", 12),
         )
         info_label.pack(side="left", padx=10)
 
@@ -283,7 +297,7 @@ class MusicDownloaderGUI:
             font=("Arial", 12),
             relief="flat",  # Flat button style
             padx=10,
-            pady=5
+            pady=5,
         )
         select_button.pack(side="right", padx=5)
 
@@ -309,7 +323,9 @@ class MusicDownloaderGUI:
         label = tk.Label(frame, text=title, anchor="w", fg="white", bg="#3c3c3c")
         label.pack(side="left")
 
-        progress_bar = ttk.Progressbar(frame, orient="horizontal", mode="determinate", length=200)
+        progress_bar = ttk.Progressbar(
+            frame, orient="horizontal", mode="determinate", length=200
+        )
         progress_bar.pack(side="left", padx=5)
 
         # Store references for cleanup
@@ -317,11 +333,16 @@ class MusicDownloaderGUI:
 
         def update_progress(current, total):
             if progress_bar.winfo_exists():
-                self.root.after(0, lambda: self._update_progress_bar(progress_bar, current, total))
+                self.root.after(
+                    0, lambda: self._update_progress_bar(progress_bar, current, total)
+                )
 
         def signal_completion():
             if frame.winfo_exists():
-                self.root.after(0, lambda: self._signal_completion(frame, label, progress_bar, title))
+                self.root.after(
+                    0,
+                    lambda: self._signal_completion(frame, label, progress_bar, title),
+                )
 
         return update_progress, signal_completion
 
