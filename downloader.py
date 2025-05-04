@@ -1,10 +1,13 @@
+from concurrent.futures import ThreadPoolExecutor
 import os
 import re
 import threading
+
 from yt_dlp import YoutubeDL
 from spotify_client import SpotifyClient
-from concurrent.futures import ThreadPoolExecutor
 from metadata import MetadataManager
+
+from config import Config
 
 
 class Downloader:
@@ -20,9 +23,12 @@ class Downloader:
         Args:
             download_path (str): The directory where songs will be downloaded.
         """
-
+        self.config = Config()
         self.download_path = download_path
-        self.spotify_client = SpotifyClient()
+        self.spotify_client = SpotifyClient(
+            client_id=self.config.spotify_client_id,
+            client_secret=self.config.spotify_client_secret,
+        )
         self.metadata_manager = MetadataManager()
         self.executor = ThreadPoolExecutor(max_workers=10)
 
