@@ -25,26 +25,26 @@
    git clone https://github.com/daniel1181888/Music-downloader.git
    cd Music-downloader
    ```
-   Install Python Dependencies:
+2. **Install Python Dependencies**:
    ```
    pip install -r requirements.txt
    ```
-2. **Set Up Spotify API Credentials:**
-   1. Copy the `example.env` file and rename it to `.env`
-   2. Visit the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications) and log in with your Spotify account
-   3. Click the "Create App" button in the top right corner
-   4. Give the app a name and description
-   5. For the redirect URI, use `http://localhost:8000`
-   6. Enable the `Web API` scope
-   7. Click the "Create" button
-   8. Copy the `Client ID` and `Client Secret` and paste them into the `.env` file
-3. **Running the Application**
+
+## Usage
+
+1. **Running the Application**
    ```bash
    python main.py
    ```
-4. **Using the Application:**
+   You will be prompted to enter your Spotify API credentials. \
+   Do as instructed in the GUI.
+2. **Using the Application:**
    - Enter a Spotify playlist URL or track URL.
    - Click the "Download" button to start downloading tracks.
+
+## Limitations
+
+- The application does not work for private playlists yet.
 
 ## Formatting (for developers)
 
