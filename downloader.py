@@ -8,6 +8,7 @@ from spotify_client import SpotifyClient
 from metadata import MetadataManager
 
 from config import Config
+from ffmpeg_utils import get_ffmpeg_path
 
 
 class Downloader:
@@ -73,6 +74,7 @@ class Downloader:
                     "preferredquality": "192",
                 }
             ],
+            "ffmpeg_location": get_ffmpeg_path(),
         }
         search_query = f"ytsearch:{song_name} {artist_name}"
         try:

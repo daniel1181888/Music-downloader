@@ -8,20 +8,13 @@ This is a simple application that allows you to download music from a Spotify pl
 
 ## Prerequisites
 
-- FFmpeg:
-  - Download FFmpeg from the [official site](https://ffmpeg.org/download.html).
-  - Follow these steps to set up FFmpeg on your system:
-    - Windows: Add the extracted FFmpeg folder (e.g., `C:\ffmpeg\bin`) to your system's PATH environment variable
-    - macOS/Linux: Install FFmpeg using Homebrew or download and configure it manually:
-      ```bash
-      brew install ffmpeg
-      ```
-  - Verify the installation by running:
-    ```bash
-    ffmpeg -version
-    ```
-  - Ensure FFmpeg is accessible globally
-- Python **(if using the source code)**:
+### For executable
+
+- An unzipping tool (e.g. [7-Zip](https://www.7-zip.org/), [WinRAR](https://www.rarlab.com/download.htm), etc.)
+
+### For source code
+
+- Python:
   - Make sure Python 3.8 or higher is installed on your system. You can download it from [python.org](https://www.python.org/).
 
 ## Installation

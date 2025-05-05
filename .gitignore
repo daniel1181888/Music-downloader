@@ -1,10 +1,24 @@
+# Editor
 .idea/
 .vscode/
+
+# Virtual environment
 .venv/
 venv/
-songs/
+
+# Cache
 __pycache__/
 .cache
+
+# Default songs download path
+songs/
+
+# Settings
 .env
 settings.json
+
+# auto-py-to-exe
 output/
+
+# FFmpeg
+ffmpeg/
