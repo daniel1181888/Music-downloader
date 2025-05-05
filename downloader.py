@@ -79,9 +79,12 @@ class Downloader:
         search_query = f"ytsearch:{song_name} {artist_name}"
         try:
             with YoutubeDL(ydl_opts) as ydl:
+                print(f"[{song_name} - {artist_name}] Downloading...")
                 ydl.download([search_query])
+                print(f"[{song_name} - {artist_name}] Downloaded")
             return os.path.join(self.download_path, f"{sanitized_name}.mp3")
         except Exception as e:
+            print(f"[{song_name} - {artist_name}] Failed to download: {e}")
             raise Exception(f"Failed to download '{song_name}' by '{artist_name}': {e}")
 
     def download_track(self, track_url, update_progress=None):
@@ -102,12 +105,15 @@ class Downloader:
             update_progress(0, 1)
 
         file_path = self.download_song(song_name, artist_name)
+        print(f"[{song_name} - {artist_name}] Adding metadata...")
         self.metadata_manager.add_metadata(
             file_path, song_name, artist_name, album_name, album_art_url
         )
+        print(f"[{song_name} - {artist_name}] Metadata added")
 
         if update_progress:
             update_progress(1, 1)
+        print(f"[{song_name} - {artist_name}] Done")
 
     def download_playlist(
         self,
