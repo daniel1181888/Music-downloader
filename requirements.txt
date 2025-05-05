@@ -6,3 +6,4 @@ mutagen~=1.47.0
 python-dotenv~=1.0.1
 pillow~=11.2.1
 black==25.1.0
+auto-py-to-exe==2.46.0
