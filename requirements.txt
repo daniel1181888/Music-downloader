@@ -1,7 +1,9 @@
 requests~=2.32.3
 tk~=0.1.0
-spotipy~=2.24.0
-yt_dlp~=2024.10.7
+spotipy~=2.25.1
+yt_dlp~=2025.4.30
 mutagen~=1.47.0
 python-dotenv~=1.0.1
-pillow~=11.0.0
+pillow~=11.2.1
+black==25.1.0
+auto-py-to-exe==2.46.0

@@ -1,55 +1,67 @@
-Install FFmpeg:
+# Music Downloader
 
-You can download FFmpeg from the official site: https://ffmpeg.org/download.html
-Choose the appropriate build for your operating system (Windows, macOS, or Linux).
-Set Up FFmpeg:
+## Overview
 
-Recommended Option
-Download the ffmpeg-master-latest-win64-gpl-shared.zip file (63.9 MB).
-https://github.com/BtbN/FFmpeg-Builds/releases
+This is a simple application that allows you to download music from a Spotify playlist using `yt-dlp`.
 
-After downloading and extracting FFmpeg, you'll need to add it to your system's PATH environment variable. This allows yt-dlp to find it.
-For Windows:
+![Application screenshot](.github/imgs/application-startup.png)
 
-- Locate the folder where you extracted FFmpeg (it should contain ffmpeg.exe, ffprobe.exe, etc.).
+## Prerequisites
 
+### For executable
 
-- Copy the path to this folder (e.g., C:\ffmpeg\bin).
+- An unzipping tool (e.g. [7-Zip](https://www.7-zip.org/), [WinRAR](https://www.rarlab.com/download.htm), etc.)
 
+### For source code
 
-- Copy the path to this folder (e.g., C:\ffmpeg\bin).
+- Python:
+  - Make sure Python 3.8 or higher is installed on your system. You can download it from [python.org](https://www.python.org/).
 
+## Installation
 
-- Right-click on "This PC" or "My Computer" and select Properties.
+1. If using the executable, just open the file `Music Downloader.exe`
+2. If using the source code:
+   1. Clone the Repository:
+      ```
+      git clone https://github.com/daniel1181888/Music-downloader.git
+      cd Music-downloader
+      ```
+   2. Install Python Dependencies:
+      ```
+      pip install -r requirements.txt
+      ```
 
+## Usage
 
-- Click on Advanced system settings.
+1. Running the Application
+   1. If using the executable, just open the file `Music Downloader.exe`
+   2. If using the source code:
+      ```bash
+      python main.py
+      ```
+      You will be prompted to enter your Spotify API credentials. \
+      Do as instructed in the GUI.
+2. Using the Application:
+   - Enter a Spotify playlist URL or track URL.
+   - Click the "Download" button to start downloading tracks.
 
+## Limitations
 
-- In the System Properties window, click the Environment Variables button.
+- The application does not work for private playlists yet.
 
+## Building the application (for developers)
 
-- In the System variables section, find the Path variable, select it, and click Edit.
+1. Open `auto-py-to-exe`
+   ```bash
+   auto-py-to-exe
+   ```
+2. Open "Settings"
+3. Click "Import Config From JSON File"
+4. Select `auto-py-to-exe.json`
+5. Click "CONVERT .PY TO .EXE"
 
+## Formatting (for developers)
 
-- Click New and paste the path to the FFmpeg bin folder.
-
-
-- Click OK to close all dialogs.
-
-
-For macOS/Linux:
-
-If you're using Homebrew, you can install FFmpeg by running:
-bash
-Code kopiëren
-brew install ffmpeg
-Alternatively, download FFmpeg and follow the instructions in the README for installation.
-Verify FFmpeg Installation:
-
-Open a command prompt or terminal window.
-Type ffmpeg -version and press Enter.
-If it’s installed correctly, you should see version information for FFmpeg.
-Run Your Script Again:
-
-After completing the steps above, try running your Python script again. It should be able to find FFmpeg and process the audio files without throwing the previous error.
+```bash
+black .
+```
